@@ -33,6 +33,17 @@ jobs:
         run: psql -v ON_ERROR_STOP=1 -f supabase/checks/ci_fixture.sql
       - name: Apply recycle-bin migration
         run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261031_recycle_bin.sql
+      - name: Ensure published articles are visible to anonymous visitors
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          set role anon;
+          do $
+          begin
+            if not exists(select 1 from public.articles where id='00000000-0000-0000-0000-000000000001') then
+              raise exception 'Published article is unexpectedly hidden';
+            end if;
+          end $;
+          SQL
       - name: Test trash and restore, privilege checks
         run: |
           psql -v ON_ERROR_STOP=1 <<'SQL'
@@ -54,6 +65,17 @@ jobs:
               raise exception 'Anonymous user must not execute trash';
             end if;
           end $$;
+          SQL
+      - name: Ensure restored drafts stay private to anonymous visitors
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          set role anon;
+          do $
+          begin
+            if exists(select 1 from public.articles where id='00000000-0000-0000-0000-000000000001') then
+              raise exception 'Restored draft unexpectedly visible publicly';
+            end if;
+          end $;
           SQL
       - name: Reject unauthorized RPC calls as authenticated redactor
         run: |
