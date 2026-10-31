@@ -47,13 +47,13 @@ for each row execute function public.guard_article_trash();
 -- Prevent permanent deletion from client sessions, even when old DELETE policies exist.
 -- Database maintenance through postgres/service_role remains possible.
 create or replace function public.prevent_client_article_delete()
-returns trigger language plpgsql set search_path='' as $
+returns trigger language plpgsql set search_path='' as $$
 begin
  if auth.role() in ('anon','authenticated') then
   raise exception 'Use the recycle bin instead of permanently deleting articles' using errcode='42501';
  end if;
  return old;
-end $;
+end $$;
 drop trigger if exists trg_prevent_client_article_delete on public.articles;
 create trigger trg_prevent_client_article_delete before delete on public.articles
 for each row execute function public.prevent_client_article_delete();
