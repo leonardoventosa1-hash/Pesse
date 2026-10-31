@@ -10,3 +10,17 @@ export async function articleBySlug(slug:string):Promise<Article|null>{
  const {data}=await db.from("articles").select("id,slug,title,excerpt,body,cover_url,category_id,status,published_at,created_at").eq("slug",slug).eq("status","published").lte("published_at",new Date().toISOString()).maybeSingle();
  return data as Article|null;
 }
+
+/** Optional featured selection: if migration has not run, keep normal ordering. */
+export async function homepageArticles(limit=6):Promise<Article[]>{
+ const latest=await publicArticles(limit);
+ const db=supabase();if(!db)return latest;
+ const {data,error}=await db.from("articles")
+  .select("id,slug,title,excerpt,body,cover_url,category_id,status,published_at,created_at,is_featured")
+  .eq("status","published").eq("is_featured",true)
+  .lte("published_at",new Date().toISOString())
+  .order("published_at",{ascending:false}).limit(1);
+ if(error||!data?.length)return latest;
+ const selected=data[0] as Article;
+ return [selected,...latest.filter(item=>item.id!==selected.id)].slice(0,limit);
+}
