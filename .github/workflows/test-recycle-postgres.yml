@@ -92,3 +92,24 @@ jobs:
             if not blocked then raise exception 'Direct article deletion unexpectedly succeeded'; end if;
           end $$;
           SQL
+      - name: Reject missing or already restored articles
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          select set_config('app.test_is_admin','true',false);
+          do $$
+          declare blocked boolean;
+          begin
+            blocked := false;
+            begin
+              perform public.trash_article('00000000-0000-0000-0000-000000000099');
+            exception when no_data_found then blocked := true;
+            end;
+            if not blocked then raise exception 'Missing article was silently trashed'; end if;
+            blocked := false;
+            begin
+              perform public.restore_article('00000000-0000-0000-0000-000000000001');
+            exception when no_data_found then blocked := true;
+            end;
+            if not blocked then raise exception 'Already restored article was silently restored again'; end if;
+          end $$;
+          SQL
