@@ -18,5 +18,6 @@ grant usage on schema public to anon,authenticated;
 grant select on public.articles to anon;
 grant select,update,delete,insert on public.articles to authenticated;
 alter table public.articles enable row level security;
+create policy "ci authenticated access" on public.articles for all to authenticated using (true) with check (true);
 insert into public.articles(id,title,status,published_at) values
  ('00000000-0000-0000-0000-000000000001','Prueba descartable','published',now());
