@@ -1,0 +1,1 @@
+export default async function Categoria({params}:{params:Promise<{slug:string}>}){const {slug}=await params;return <main className="container main"><div className="eyebrow">Secciones</div><h1>{slug.charAt(0).toUpperCase()+slug.slice(1)}</h1><p className="muted">Estamos preparando las noticias de esta sección.</p></main>}
