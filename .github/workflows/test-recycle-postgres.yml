@@ -1,0 +1,57 @@
+name: Test recycle-bin migration in PostgreSQL
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: pesse_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: test
+      PGDATABASE: pesse_test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up disposable schema
+        run: psql -v ON_ERROR_STOP=1 -f supabase/checks/ci_fixture.sql
+      - name: Apply recycle-bin migration
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261031_recycle_bin.sql
+      - name: Test trash and restore, privilege checks
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          select set_config('app.test_is_admin','true',false);
+          select public.trash_article('00000000-0000-0000-0000-000000000001');
+          do $$
+          begin
+            if not exists(select 1 from public.articles where deleted_at is not null and status='draft' and published_at is null and is_featured=false) then
+              raise exception 'Trash did not unpublish the article';
+            end if;
+          end $$;
+          select public.restore_article('00000000-0000-0000-0000-000000000001');
+          do $$
+          begin
+            if not exists(select 1 from public.articles where deleted_at is null and status='draft' and published_at is null) then
+              raise exception 'Restore did not return article as draft';
+            end if;
+            if has_function_privilege('anon','public.trash_article(uuid)','EXECUTE') then
+              raise exception 'Anonymous user must not execute trash';
+            end if;
+          end $$;
+          SQL
