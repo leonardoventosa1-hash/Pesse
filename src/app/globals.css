@@ -16,3 +16,18 @@
 .dashboard-count{font-size:14px;color:#626a74;margin-bottom:18px}
 @media(max-width:900px){.front-news{grid-template-columns:1fr}.secondary-story{flex:none}}
 @media(max-width:600px){.lead-story>img,.lead-placeholder{height:225px}.lead-content{padding:22px}.secondary-story{grid-template-columns:90px minmax(0,1fr)}.secondary-story img{width:90px;min-height:90px}.secondary-story h3{font-size:16px}.secondary-story p{display:none}}
+
+/* Redacción: herramientas y vista previa */
+.editor-toolbar{display:flex;gap:8px;flex-wrap:wrap;padding:12px;background:#eef0f2;border:1px solid #d7dbe0;border-radius:6px}
+.editor-toolbar button{background:#fff;color:#162034;border:1px solid #cbd1d7;border-radius:5px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.editor-toolbar button:hover{border-color:#ee454c}
+.editor-preview{padding:16px 20px;border:1px solid #d5d9de;border-radius:8px;background:#fff}
+.editor-preview summary{cursor:pointer;font-weight:700}
+.editor-preview .article-body{font-size:16px}
+.article-body h2{font-size:30px;line-height:1.3;margin:40px 0 16px}
+.article-body h3{font-size:24px;line-height:1.35;margin:28px 0 14px}
+.article-body a{color:#ce303a;text-decoration:underline;text-underline-offset:3px}
+.article-body figure{margin:32px 0}
+.article-body figure img{width:100%;height:auto;border-radius:4px}
+.article-body figcaption{font-size:13px;color:#626a74;margin-top:8px}
+.article-body blockquote{border-left:4px solid #ed444a;padding:10px 22px;margin:28px 0;background:#f3f4f5;font-weight:600}
