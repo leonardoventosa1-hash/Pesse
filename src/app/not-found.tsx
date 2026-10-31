@@ -1,0 +1,1 @@
+import Link from "next/link";export default function NotFound(){return <main className="container main"><div className="eyebrow">ERROR 404</div><h1>No encontramos esta página</h1><p className="muted">La noticia puede no estar publicada o la dirección es incorrecta.</p><Link href="/" className="primary-button">Volver al inicio ↗</Link></main>}
