@@ -1,0 +1,2 @@
+export const metadata={title:"Noticias | Pesse"};
+export default function Noticias(){return <main className="container main"><div className="eyebrow">Actualidad</div><h1>Noticias</h1><p className="muted">Sección en preparación. Próximamente publicaremos las novedades desde nuestro panel editorial.</p></main>}
