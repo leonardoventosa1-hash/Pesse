@@ -55,3 +55,34 @@ jobs:
             end if;
           end $$;
           SQL
+      - name: Reject unauthorized trash and restore
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          select set_config('app.test_is_admin','false',false);
+          do $$
+          begin
+            begin
+              perform public.trash_article('00000000-0000-0000-0000-000000000001');
+              raise exception 'Redactor incorrectly allowed to trash';
+            exception when insufficient_privilege then null;
+            end;
+            begin
+              perform public.restore_article('00000000-0000-0000-0000-000000000001');
+              raise exception 'Redactor incorrectly allowed to restore';
+            exception when insufficient_privilege then null;
+            end;
+          end $$;
+          SQL
+      - name: Reject permanent delete from authenticated client
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          select set_config('request.jwt.claim.role','authenticated',false);
+          do $$
+          begin
+            begin
+              delete from public.articles where id='00000000-0000-0000-0000-000000000001';
+              raise exception 'Direct deletion unexpectedly succeeded';
+            exception when insufficient_privilege then null;
+            end;
+          end $$;
+          SQL
