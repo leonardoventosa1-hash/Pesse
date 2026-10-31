@@ -191,3 +191,14 @@ body{background:var(--paper);color:var(--ink)}
 .writing-submit span{color:#627467;font-size:13px;max-width:370px;line-height:1.5}
 .writing-submit .primary-button{margin-top:0}
 @media(max-width:560px){.writing-overview{gap:7px}.writing-overview>div{padding:11px}.writing-overview strong{font-size:16px}.writing-overview span{font-size:11px}}
+
+/* Full preview within the newsroom editor */
+.editor-preview-toggle{border:1px solid #1d503e;color:#1d503e;background:#fff;border-radius:5px;padding:13px 18px;font:inherit;font-weight:700;cursor:pointer;margin:0 0 18px}
+.editor-preview-toggle:hover,.editor-preview-toggle:focus-visible{background:#ecf3ee}
+.full-article-preview{background:#fff;border:1px solid #dbe4dd;border-top:5px solid #1d503e;padding:35px;margin:0 0 24px;max-width:100%}
+.full-article-preview .article-heading{max-width:100%;margin:0 0 24px}
+.full-article-preview .article-heading h1{font-size:clamp(30px,4vw,48px)}
+.full-article-preview .article-main-image{margin:20px 0 28px}
+.full-article-preview .article-main-image img{width:100%;max-height:430px;object-fit:cover}
+.full-article-preview .article-body{font-size:18px;line-height:1.75}
+@media(max-width:600px){.full-article-preview{padding:20px}.full-article-preview .article-heading h1{letter-spacing:-1px}}
