@@ -8,7 +8,7 @@ Esta funcionalidad permanece en una rama y no debe fusionarse antes de aplicar y
 4. Verificar con un administrador: enviar una noticia de prueba a papelera. La operación debe cambiar `deleted_at`, `status=draft`, `published_at=null` y `is_featured=false`.
 5. Verificar que la noticia no aparezca en portada, categorías, últimas noticias ni por URL; y que un visitante anónimo no pueda leerla en Supabase.
 6. Restaurar esa misma noticia: vuelve como borrador, nunca publicada automáticamente.
-7. Verificar que usuarios con rol redactor no puedan ejecutar ninguna de las funciones administrativas.
+7. Verificar que usuarios con rol redactor no puedan ejecutar ninguna de las funciones administrativas y que una eliminación directa con el cliente autenticado sea rechazada por `trg_prevent_client_article_delete`.
 8. Fusionar PR y comprobar compilación y despliegue Vercel. No realizar el paso 8 si falla cualquier validación.
 
 Importante: **no** revertir eliminando la columna `deleted_at` si ya se utilizaron funciones de papelera. La restauración de contenido depende de esa columna.
