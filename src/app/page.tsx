@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import {publicArticles} from "@/lib/articles";
 const sections=[{name:"Política",slug:"politica",desc:"Decisiones y protagonistas de la agenda pública."},{name:"Sociedad",slug:"sociedad",desc:"Las historias que impactan en nuestra comunidad."},{name:"Deportes",slug:"deportes",desc:"Competencias, equipos y protagonistas."},{name:"Cultura",slug:"cultura",desc:"Arte, música, patrimonio y nuevas voces."}];
