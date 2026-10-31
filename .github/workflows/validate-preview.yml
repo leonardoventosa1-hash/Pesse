@@ -19,13 +19,16 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import re
           sql = Path("supabase/migrations/20261031_recycle_bin.sql").read_text()
-          if re.search(r'(?<!\\$)\\$(?!\\$)', sql):
-              raise SystemExit("Found unpaired single dollar delimiter in SQL migration")
-          if sql.count("$") % 2:
-              raise SystemExit("Unbalanced dollar-quoted SQL function bodies")
-          print("SQL function delimiters verified")
+          quoted = sql.split("$$")
+          if len(quoted) != 9:
+              raise SystemExit("Expected four complete SQL function bodies (8 $$ delimiters)")
+          if any("create or replace function" in quoted[i] for i in range(1,len(quoted),2)):
+              raise SystemExit("Unexpected nested function definition")
+          for i in range(0,len(quoted),2):
+              if "$" in quoted[i]:
+                  raise SystemExit("Malformed single-dollar SQL delimiter")
+          print("Four SQL function bodies properly dollar-quoted")
           PY
       - name: TypeScript validation
         run: npm run check
