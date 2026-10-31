@@ -113,3 +113,19 @@ jobs:
             if not blocked then raise exception 'Already restored article was silently restored again'; end if;
           end $$;
           SQL
+      - name: Ensure trashed stories are invisible to anonymous visitors
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          update public.articles set status='published',published_at=now()
+          where id='00000000-0000-0000-0000-000000000001';
+          select set_config('app.test_is_admin','true',false);
+          select public.trash_article('00000000-0000-0000-0000-000000000001');
+          set role anon;
+          do $$
+          begin
+            if exists(select 1 from public.articles where id='00000000-0000-0000-0000-000000000001') then
+              raise exception 'Trashed article leaked through public SELECT';
+            end if;
+          end $$;
+          reset role;
+          SQL
