@@ -15,6 +15,8 @@ create table public.articles (
 create function public.is_admin() returns boolean language sql stable as $$select current_setting('app.test_is_admin',true)='true'$$;
 create function public.is_editor() returns boolean language sql stable as $$select true$$;
 grant usage on schema public to anon,authenticated;
+grant select on public.articles to anon;
 grant select,update,delete,insert on public.articles to authenticated;
+alter table public.articles enable row level security;
 insert into public.articles(id,title,status,published_at) values
  ('00000000-0000-0000-0000-000000000001','Prueba descartable','published',now());
