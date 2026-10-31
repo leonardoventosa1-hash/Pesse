@@ -51,3 +51,11 @@ create policy "admins can delete articles" on public.articles for delete to auth
 -- Para autorizar un editor, usar SQL Editor (privilegiado), después de crear usuario:
 -- insert into public.editor_roles(user_id,role) values ('UUID-DEL-USUARIO','admin');
 -- Nunca agregar service_role a variables NEXT_PUBLIC_*.
+
+-- Verificación segura: no expone listado de roles a los clientes.
+create or replace function public.is_editor() returns boolean
+language sql stable security definer set search_path = '' as $$
+ select exists(select 1 from public.editor_roles where user_id = (select auth.uid()));
+$$;
+revoke all on function public.is_editor() from public,anon;
+grant execute on function public.is_editor() to authenticated;
