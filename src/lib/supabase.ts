@@ -11,5 +11,5 @@ export function supabase(): SupabaseClient | null {
  } catch {return null;}
  return createClient(url,key);
 }
-export type Article={id:string;slug:string;title:string;excerpt:string;body:string;cover_url:string|null;category_id:string|null;status:"draft"|"published";published_at:string|null;created_at:string};
+export type Article={id:string;slug:string;title:string;excerpt:string;body:string;cover_url:string|null;category_id:string|null;status:"draft"|"published";published_at:string|null;created_at:string;is_featured?:boolean};
 export type Category={id:string;slug:string;name:string};
