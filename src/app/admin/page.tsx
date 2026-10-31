@@ -1,0 +1,10 @@
+"use client";
+import {useEffect,useState} from "react";import Link from "next/link";import {useRouter} from "next/navigation";import {supabase,type Article} from "@/lib/supabase";
+export default function Dashboard(){const router=useRouter();const[items,setItems]=useState<Article[]>([]);const[message,setMessage]=useState("Cargando...");useEffect(()=>{let active=true;(async()=>{const db=supabase();if(!db){setMessage("Configurá Supabase primero.");return}const {data:{user}}=await db.auth.getUser();if(!user){router.replace("/admin/login");return}
+const {data:role,error:roleError}=await db.from("editor_roles").select("role").eq("user_id",user.id).maybeSingle();
+// Sin política SELECT en editor_roles: consultar privilegios mediante función RPC segura.
+const {data:allowed,error:rpcError}=await db.rpc("is_editor");
+if(roleError||(!role&&rpcError)||allowed!==true){if(active)setMessage("Este usuario no tiene permisos editoriales.");return}
+const {data,error}=await db.from("articles").select("id,slug,title,excerpt,body,cover_url,category_id,status,published_at,created_at").order("created_at",{ascending:false}).limit(100);
+if(active){setItems((data??[]) as Article[]);setMessage(error?error.message:"")}})();return()=>{active=false}},[router]);
+return <main className="container main"><div className="section-heading"><div><div className="eyebrow">PANEL EDITORIAL</div><h1>Administrar Pesse</h1></div><Link className="primary-button" href="/admin/nueva">+ Nueva noticia</Link></div>{message?<p role="status">{message}</p>:<div className="editor-list">{items.length===0?<p>No hay artículos todavía.</p>:items.map(a=><div className="editor-row" key={a.id}><div><strong>{a.title}</strong><p className="muted">{a.status==="published"?"Publicada":"Borrador"}</p></div><Link href={`/admin/editar/${a.id}`}>Editar ↗</Link></div>)}</div>}<button className="secondary-button" onClick={async()=>{await supabase()?.auth.signOut();router.push("/admin/login")}}>Cerrar sesión</button></main>}
