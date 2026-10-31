@@ -219,3 +219,7 @@ body{background:var(--paper);color:var(--ink)}
 .media-library-actions button{border:1px solid #1d503e;background:white;color:#1d503e;border-radius:4px;padding:9px;font-size:12px;font-weight:700;cursor:pointer}
 .media-library-actions button:hover{background:#eaf2ed}
 @media(max-width:660px){.media-library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Visual indication for manually featured story */
+.featured-indicator{display:inline-block;margin:7px 0 0;padding:5px 9px;border-radius:4px;background:#e7f2ea;color:#174f34;font-size:11px;font-weight:800}
+.dashboard-article-actions button:disabled{opacity:.55;cursor:default}
