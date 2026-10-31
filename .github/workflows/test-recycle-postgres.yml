@@ -37,12 +37,12 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 <<'SQL'
           set role anon;
-          do $
+          do $publiccheck$
           begin
             if not exists(select 1 from public.articles where id='00000000-0000-0000-0000-000000000001') then
               raise exception 'Published article is unexpectedly hidden';
             end if;
-          end $;
+          end $publiccheck$;
           SQL
       - name: Test trash and restore, privilege checks
         run: |
@@ -70,12 +70,12 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 <<'SQL'
           set role anon;
-          do $
+          do $publiccheck$
           begin
             if exists(select 1 from public.articles where id='00000000-0000-0000-0000-000000000001') then
               raise exception 'Restored draft unexpectedly visible publicly';
             end if;
-          end $;
+          end $publiccheck$;
           SQL
       - name: Reject unauthorized RPC calls as authenticated redactor
         run: |
