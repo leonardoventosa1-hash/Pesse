@@ -129,3 +129,23 @@ jobs:
           end $$;
           reset role;
           SQL
+      - name: Block redactor edits on trashed stories
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          select set_config('app.test_is_admin','true',false);
+          -- The previous privacy test left the fixture article in the trash.
+          select set_config('app.test_is_admin','false',false);
+          set role authenticated;
+          do $$
+          declare blocked boolean := false;
+          begin
+            begin
+              update public.articles set title='Unauthorized edit'
+              where id='00000000-0000-0000-0000-000000000001';
+            exception when insufficient_privilege then blocked := true;
+            end;
+            if not blocked then
+              raise exception 'Redactor could edit a trashed article';
+            end if;
+          end $$;
+          SQL
