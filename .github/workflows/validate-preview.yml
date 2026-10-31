@@ -15,6 +15,18 @@ jobs:
           node-version: '22'
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Check SQL function delimiters
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          sql = Path("supabase/migrations/20261031_recycle_bin.sql").read_text()
+          if re.search(r'(?<!\\$)\\$(?!\\$)', sql):
+              raise SystemExit("Found unpaired single dollar delimiter in SQL migration")
+          if sql.count("$") % 2:
+              raise SystemExit("Unbalanced dollar-quoted SQL function bodies")
+          print("SQL function delimiters verified")
+          PY
       - name: TypeScript validation
         run: npm run check
       - name: Next.js production build
