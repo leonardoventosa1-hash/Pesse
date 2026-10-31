@@ -14,7 +14,7 @@ begin
  update public.articles set deleted_at=now(), status='draft', published_at=null, is_featured=false, updated_at=now()
  where id=target_id and deleted_at is null;
  if not found then raise exception 'Article not found or already in trash' using errcode='P0002'; end if;
-end $;
+end $$;
 create or replace function public.restore_article(target_id uuid)
 returns void language plpgsql security definer set search_path='' as $$
 begin
@@ -22,7 +22,7 @@ begin
  update public.articles set deleted_at=null,status='draft',published_at=null,is_featured=false,updated_at=now()
  where id=target_id and deleted_at is not null;
  if not found then raise exception 'Article not found in trash' using errcode='P0002'; end if;
-end $;
+end $$;
 -- Block direct edits to trashed articles and prevent non-admins from changing deletion state.
 -- Administrators retain the ability to restore through the guarded RPC.
 create or replace function public.guard_article_trash()
