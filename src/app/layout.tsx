@@ -1,6 +1,6 @@
 import "./globals.css";
-import Link from "next/link";
+import SiteNavigation from "@/components/SiteNavigation";
 import Image from "next/image";
 import type { Metadata } from "next";
 export const metadata: Metadata = {title:"Pesse | Periodismo y actualidad",description:"Noticias, entrevistas y actualidad en Pesse",icons:{icon:"/pesse-icon.svg"},openGraph:{title:"Pesse | Periodismo y actualidad",description:"Noticias, entrevistas y actualidad en Pesse"}};
-export default function Layout({children}:{children:React.ReactNode}) {return <html lang="es"><body><header className="header"><nav className="container nav"><Link className="brand" href="/" aria-label="Pesse, ir al inicio"><Image src="/pesse-logo-verde.svg" alt="PESSE" width={192} height={47} priority/></Link><div className="links"><Link href="/">Inicio</Link><Link href="/noticias">Noticias</Link><Link href="/categoria/politica">Política</Link><Link href="/categoria/sociedad">Sociedad</Link><Link href="/categoria/deportes">Deportes</Link><Link href="/categoria/cultura">Cultura</Link></div></nav></header>{children}<footer className="footer"><div className="container footer-inner"><Image src="/pesse-logo-verde.svg" alt="PESSE" width={140} height={34}/> <span>Información con otra mirada.</span></div></footer></body></html>}
+export default function Layout({children}:{children:React.ReactNode}) {return <html lang="es"><body><header className="header"><SiteNavigation/></header>{children}<footer className="footer"><div className="container footer-inner"><Image src="/pesse-logo-verde.svg" alt="PESSE" width={140} height={34}/> <span>Información con otra mirada.</span></div></footer></body></html>}
