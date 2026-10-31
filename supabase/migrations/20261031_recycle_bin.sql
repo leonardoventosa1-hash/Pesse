@@ -24,7 +24,7 @@ end $$;
 -- Block direct edits to trashed articles and prevent non-admins from changing deletion state.
 -- Administrators retain the ability to restore through the guarded RPC.
 create or replace function public.guard_article_trash()
-returns trigger language plpgsql security definer set search_path='' as $
+returns trigger language plpgsql security definer set search_path='' as $$
 begin
  if tg_op='INSERT' then
   if new.deleted_at is not null then
@@ -39,7 +39,7 @@ begin
   end if;
  end if;
  return new;
-end $;
+end $$;
 drop trigger if exists trg_guard_article_trash on public.articles;
 create trigger trg_guard_article_trash before insert or update on public.articles
 for each row execute function public.guard_article_trash();
