@@ -1,0 +1,1 @@
+export const metadata={title:"Videos | Pesse"};export default function Videos(){return <main className="container main"><div className="eyebrow">PESSE AUDIOVISUAL</div><h1>Videos</h1><p className="muted">Próximamente vas a encontrar nuestras entrevistas, programas y coberturas. Aún no hay videos vinculados.</p></main>}
