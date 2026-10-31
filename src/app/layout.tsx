@@ -1,0 +1,5 @@
+import "./globals.css";
+import Link from "next/link";
+import type { Metadata } from "next";
+export const metadata: Metadata = {title:"Pesse | Periodismo y actualidad",description:"Portal de noticias de Pesse"};
+export default function Layout({children}:{children:React.ReactNode}) {return <html lang="es"><body><header className="header"><nav className="container nav"><Link className="brand" href="/">PESSE<span>.</span></Link><div className="links"><Link href="/">Inicio</Link><Link href="/noticias">Noticias</Link><Link href="/categoria/politica">Política</Link><Link href="/categoria/sociedad">Sociedad</Link><Link href="/categoria/deportes">Deportes</Link><Link href="/categoria/cultura">Cultura</Link></div></nav></header>{children}<footer className="footer"><div className="container">PESSE · Información con otra mirada.</div></footer></body></html>}

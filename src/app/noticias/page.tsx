@@ -1,0 +1,3 @@
+import Link from "next/link";import {publicArticles} from "@/lib/articles";
+export const metadata={title:"Noticias | Pesse"};
+export default async function Noticias(){const articles=await publicArticles(60);return <main className="container main"><div className="eyebrow">ACTUALIDAD</div><h1>Últimas noticias</h1>{articles.length===0?<p className="muted">Todavía no hay noticias publicadas.</p>:<div className="news-grid">{articles.map(a=><Link className="news-card" href={`/noticias/${a.slug}`} key={a.id}>{a.cover_url&&<img src={a.cover_url} alt=""/>}<div className="news-card-content"><span className="eyebrow">PESSE</span><h2>{a.title}</h2><p>{a.excerpt}</p></div></Link>)}</div>}</main>}
