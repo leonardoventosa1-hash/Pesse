@@ -21,6 +21,29 @@ begin
  update public.articles set deleted_at=null,status='draft',published_at=null,is_featured=false,updated_at=now()
  where id=target_id and deleted_at is not null;
 end $$;
+-- Block direct edits to trashed articles and prevent non-admins from changing deletion state.
+-- Administrators retain the ability to restore through the guarded RPC.
+create or replace function public.guard_article_trash()
+returns trigger language plpgsql security definer set search_path='' as $
+begin
+ if tg_op='INSERT' then
+  if new.deleted_at is not null then
+   raise exception 'New articles cannot start in the trash' using errcode='42501';
+  end if;
+ elsif tg_op='UPDATE' then
+  if old.deleted_at is not null and not public.is_admin() then
+   raise exception 'Restore this article before editing' using errcode='42501';
+  end if;
+  if new.deleted_at is distinct from old.deleted_at and not public.is_admin() then
+   raise exception 'Only admins can move articles to or from trash' using errcode='42501';
+  end if;
+ end if;
+ return new;
+end $;
+drop trigger if exists trg_guard_article_trash on public.articles;
+create trigger trg_guard_article_trash before insert or update on public.articles
+for each row execute function public.guard_article_trash();
+
 revoke all on function public.trash_article(uuid) from public,anon;
 revoke all on function public.restore_article(uuid) from public,anon;
 grant execute on function public.trash_article(uuid) to authenticated;
