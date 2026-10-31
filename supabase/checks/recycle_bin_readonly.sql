@@ -24,3 +24,26 @@ select id,title,status,published_at,deleted_at,is_featured
 from public.articles
 where deleted_at is not null
 order by deleted_at desc limit 20;
+
+-- Confirm all defensive triggers are enabled on the article table.
+select t.tgname as trigger_name, t.tgenabled as enabled_flag,
+       pg_get_triggerdef(t.oid) as definition
+from pg_trigger t
+where t.tgrelid='public.articles'::regclass
+  and not t.tgisinternal
+  and t.tgname in ('trg_guard_article_trash','trg_prevent_client_article_delete')
+order by t.tgname;
+
+-- Confirm protected functions cannot be called by anonymous visitors.
+select p.proname,
+       has_function_privilege('anon',p.oid,'EXECUTE') as anonymous_can_execute,
+       has_function_privilege('authenticated',p.oid,'EXECUTE') as authenticated_can_execute
+from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+where n.nspname='public' and p.proname in ('trash_article','restore_article','guard_article_trash','prevent_client_article_delete')
+order by p.proname;
+
+-- Deleted rows must never remain published or featured.
+select count(*) as unsafe_trashed_records
+from public.articles
+where deleted_at is not null and
+      (status <> 'draft' or published_at is not null or is_featured is true);
