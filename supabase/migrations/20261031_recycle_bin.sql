@@ -33,11 +33,21 @@ begin
    raise exception 'New articles cannot start in the trash' using errcode='42501';
   end if;
  elsif tg_op='UPDATE' then
-  if old.deleted_at is not null and not public.is_admin() then
-   raise exception 'Restore this article before editing' using errcode='42501';
+  if old.deleted_at is not null then
+   if not public.is_admin() then
+    raise exception 'Restore this article before editing' using errcode='42501';
+   end if;
+   if new.deleted_at is not null then
+    raise exception 'Restore this article before editing' using errcode='42501';
+   end if;
   end if;
-  if new.deleted_at is distinct from old.deleted_at and not public.is_admin() then
-   raise exception 'Only admins can move articles to or from trash' using errcode='42501';
+  if new.deleted_at is distinct from old.deleted_at then
+   if not public.is_admin() then
+    raise exception 'Only admins can move articles to or from trash' using errcode='42501';
+   end if;
+   if new.status is distinct from 'draft' or new.published_at is not null or new.is_featured then
+    raise exception 'Trash transitions must leave articles as unpublished drafts' using errcode='23514';
+   end if;
   end if;
  end if;
  return new;
