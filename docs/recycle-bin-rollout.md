@@ -2,7 +2,7 @@
 
 Esta funcionalidad permanece en una rama y no debe fusionarse antes de aplicar y comprobar la migración.
 
-1. Realizar respaldo de `public.articles` desde Supabase.
+1. Realizar respaldo de `public.articles` desde Supabase y verificar que el archivo exportado esté disponible. Ejecutar `supabase/checks/recycle_bin_preflight.sql` (solo lectura) y revisar esquema, políticas y conteos antes de continuar.
 2. Ejecutar una única vez `supabase/migrations/20261031_recycle_bin.sql` en SQL Editor.
 3. Ejecutar el script **de solo lectura** `supabase/checks/recycle_bin_readonly.sql` para comprobar que `articles.deleted_at` exista, que las funciones `trash_article(uuid)` y `restore_article(uuid)` estén disponibles, que el rol `anon` no pueda ejecutarlas y que la política pública excluya `deleted_at is not null`. Revisar sus resultados antes de continuar.
 4. Verificar con un administrador: enviar una noticia de prueba a papelera. La operación debe cambiar `deleted_at`, `status=draft`, `published_at=null` y `is_featured=false`.
