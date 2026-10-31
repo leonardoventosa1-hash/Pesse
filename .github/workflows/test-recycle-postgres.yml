@@ -171,3 +171,30 @@ jobs:
             end if;
           end $$;
           SQL
+      - name: Block unsafe admin modifications of trashed articles
+        run: |
+          psql -v ON_ERROR_STOP=1 <<'SQL'
+          select set_config('app.test_is_admin','true',false);
+          do $$
+          declare blocked boolean;
+          begin
+            blocked := false;
+            begin
+              update public.articles set status='published',published_at=now()
+              where id='00000000-0000-0000-0000-000000000001';
+            exception when insufficient_privilege then blocked := true;
+            end;
+            if not blocked then raise exception 'Trashed article was edited without restoration'; end if;
+            blocked := false;
+            begin
+              update public.articles set deleted_at=null,status='published',published_at=now()
+              where id='00000000-0000-0000-0000-000000000001';
+            exception when check_violation then blocked := true;
+            end;
+            if not blocked then raise exception 'Direct restoration published the article'; end if;
+            if not exists(select 1 from public.articles where deleted_at is not null and status='draft' and published_at is null) then
+              raise exception 'Rejected updates altered trashed article';
+            end if;
+            perform public.restore_article('00000000-0000-0000-0000-000000000001');
+          end $$;
+          SQL
