@@ -202,3 +202,8 @@ body{background:var(--paper);color:var(--ink)}
 .full-article-preview .article-main-image img{width:100%;max-height:430px;object-fit:cover}
 .full-article-preview .article-body{font-size:18px;line-height:1.75}
 @media(max-width:600px){.full-article-preview{padding:20px}.full-article-preview .article-heading h1{letter-spacing:-1px}}
+
+/* Claridad para gestión de fotografías en la redacción */
+.writing-upload-caption{display:block;color:#425b4b;font-weight:700;font-size:13px;margin:12px 0 8px}
+.writing-upload-notice{padding:12px 16px;border-left:4px solid #1d503e;background:#edf4ef;color:#193d2a;font-weight:600;line-height:1.5}
+.writing-media-help{font-size:13px;color:#637569;line-height:1.55;margin:10px 0}
