@@ -162,3 +162,19 @@ body{background:var(--paper);color:var(--ink)}
 .category-empty h2{font-size:29px;line-height:1.2}
 .category-empty p{color:#66766a;line-height:1.7}
 @media(max-width:760px){.category-top-story{grid-template-columns:1fr}.category-top-story>img,.category-top-story>.category-news-placeholder{height:230px;min-height:230px}.category-top-story-text{padding:25px}.category-empty{padding:24px}.category-landing-intro p{font-size:16px}}
+
+/* PESSE newsroom visual dashboard */
+.editorial-dashboard .section-heading{align-items:center}
+.dashboard-subtitle{color:#65766a;line-height:1.55;margin:8px 0 0}
+.dashboard-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0}
+.dashboard-stat{background:#fff;border:1px solid #dbe5dd;border-top:3px solid #1d503e;border-radius:6px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.dashboard-stat span{font-size:13px;color:#617065;font-weight:700}
+.dashboard-stat strong{font-size:37px;letter-spacing:-1px;color:#162a23}
+.dashboard-article-main{display:flex;align-items:center;gap:16px;min-width:0}
+.dashboard-article-main img,.dashboard-no-image{width:88px;height:66px;object-fit:cover;border-radius:4px;flex-shrink:0}
+.dashboard-no-image{display:grid;place-items:center;background:#e3ebe5;color:#1d503e;font-size:26px;font-weight:900}
+.dashboard-article-main strong{display:block;line-height:1.35}
+.dashboard-article-main .muted{font-size:12px;margin:7px 0 0}
+.dashboard-article-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+@media(max-width:800px){.dashboard-stats{gap:9px}.dashboard-stat{padding:15px}.dashboard-stat strong{font-size:29px}.editorial-dashboard .section-heading{align-items:flex-start;flex-direction:column}.dashboard-article-actions{justify-content:flex-start}}
+@media(max-width:530px){.dashboard-stats{grid-template-columns:1fr 1fr}.dashboard-stat:first-child{grid-column:1/-1}.dashboard-article-main img,.dashboard-no-image{width:65px;height:56px}}
