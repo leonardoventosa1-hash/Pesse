@@ -2,6 +2,7 @@
 create role anon nologin;
 create role authenticated nologin;
 create schema auth;
+grant usage on schema auth to authenticated;
 create function auth.role() returns text language sql stable as $$select current_setting('request.jwt.claim.role',true)$$;
 create table public.articles (
  id uuid primary key,
