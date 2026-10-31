@@ -3,7 +3,7 @@ import {useState} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {usePathname} from "next/navigation";
-const items=[["Inicio","/"],["Noticias","/noticias"],["Política","/categoria/politica"],["Sociedad","/categoria/sociedad"],["Deportes","/categoria/deportes"],["Cultura","/categoria/cultura"]];
+const items=[["Inicio","/"],["Noticias","/noticias"],["Política","/categoria/politica"],["Sociedad","/categoria/sociedad"],["Deportes","/categoria/deportes"],["Cultura","/categoria/cultura"],["Música","/categoria/musica"],["Turismo","/categoria/turismo"],["Entretenimiento","/categoria/entretenimiento"]];
 export default function SiteNavigation(){
  const [open,setOpen]=useState(false);const pathname=usePathname();
  return <nav className="container nav" aria-label="Navegación principal">
