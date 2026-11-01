@@ -5,7 +5,7 @@ import {publicArticles} from "@/lib/articles";
 
 export const metadata:Metadata={title:"Buscar noticias | Pesse",description:"Buscá noticias y coberturas de Pesse por título y contenido."};
 
-const normalizeSearch=(value:string)=>value.normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("es");
+const normalizeSearch=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("es");
 
 export default async function Buscar({searchParams}:{searchParams:Promise<{q?:string;page?:string}>}){
  const {q="",page="1"}=await searchParams;
