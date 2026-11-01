@@ -39,9 +39,9 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
       <div className="news-card-content"><span className="eyebrow">ACTUALIDAD</span><h2>{a.title}</h2><p>{a.excerpt}</p></div>
      </Link>)}</div>}
      {!failed&&total>perPage&&<nav aria-label="Páginas de resultados" className="news-search-pagination" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:16,marginTop:30}}>
-       {currentPage>1?<Link className="secondary-button" href={pageUrl(selectedPage-1)}>← Anterior</Link>:null}
-       <span>Página {selectedPage} de {totalPages}</span>
-       {selectedPage<totalPages?<Link className="secondary-button" href={pageUrl(selectedPage+1)}>Siguiente →</Link>:null}
+       {currentPage>1?<Link className="secondary-button" href={pageUrl(currentPage-1)}>← Anterior</Link>:null}
+       <span>Página {currentPage} de {totalPages}</span>
+       {currentPage<totalPages?<Link className="secondary-button" href={pageUrl(currentPage+1)}>Siguiente →</Link>:null}
      </nav>}</>}
  </main>;
 }
