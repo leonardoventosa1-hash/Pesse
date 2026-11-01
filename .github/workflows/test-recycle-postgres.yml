@@ -50,7 +50,7 @@ jobs:
                or has_function_privilege('authenticated','public.guard_article_featured()','EXECUTE') then
               raise exception 'Featured internal trigger exposed';
             end if;
-          end $ci_feature$;
+          end $ci_check$;
           SQL
       - name: Ensure published articles are visible to anonymous visitors
         run: |
