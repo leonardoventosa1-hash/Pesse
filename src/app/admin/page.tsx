@@ -6,6 +6,15 @@ if(!role){if(active)setMessage("Este usuario no tiene permisos editoriales.");re
 let query=db.from("articles").select("id,slug,title,excerpt,body,cover_url,category_id,status,published_at,created_at,is_featured,deleted_at").order("created_at",{ascending:false}).limit(100);if(role==="redactor")query=query.eq("author_id",user.id);const [{data,error},categoriesResult]=await Promise.all([query,db.from("categories").select("id,slug,name").order("name")]);
 if(active){setItems((data??[]) as Article[]);setCategories((categoriesResult.data??[]) as Category[]);setMessage(error?error.message:"")}})();return()=>{active=false}},[router]);
 async function removeArticle(id:string,title:string){if(role!=="admin"||!window.confirm(`¿Enviar a la papelera la noticia "${title}"? Podrás recuperarla después.`))return;const db=supabase();if(!db)return;const {error}=await db.rpc("trash_article",{target_id:id});if(error){setNotice("No se pudo enviar a la papelera: "+error.message);return}setItems(current=>current.map(a=>a.id===id?{...a,deleted_at:new Date().toISOString(),status:"draft",published_at:null,is_featured:false}:a));setNotice("Noticia enviada a la papelera.")}
+async function unpublishArticle(id:string,title:string){
+ if(role!=="admin"||!window.confirm(`¿Retirar de publicación la noticia "${title}"? Seguirá disponible como borrador.`))return;
+ const db=supabase();if(!db)return;
+ setNotice("Retirando noticia de publicación...");
+ const {data,error}=await db.from("articles").update({status:"draft",published_at:null,is_featured:false}).eq("id",id).eq("status","published").is("deleted_at",null).select("id").maybeSingle();
+ if(error||!data){setNotice("No se pudo retirar la noticia: "+(error?.message??"La noticia ya cambió de estado."));return}
+ setItems(current=>current.map(a=>a.id===id?{...a,status:"draft",published_at:null,is_featured:false}:a));
+ setNotice("Noticia retirada de publicación. Quedó guardada como borrador.");
+}
 async function restoreArticle(id:string){if(role!=="admin")return;const db=supabase();if(!db)return;const {error}=await db.rpc("restore_article",{target_id:id});if(error){setNotice("No se pudo restaurar: "+error.message);return}setItems(current=>current.map(a=>a.id===id?{...a,deleted_at:null,status:"draft",published_at:null,is_featured:false}:a));setNotice("Noticia recuperada como borrador. Revisala antes de volver a publicarla.")}
 const visible=items.filter(a=>(showTrash?!!a.deleted_at:!a.deleted_at)&&(filter==="all"||a.status===filter)&&(categoryFilter==="all"||a.category_id===categoryFilter)&&a.title.toLocaleLowerCase("es").includes(search.toLocaleLowerCase("es"))).sort((a,b)=>sort==="az"?a.title.localeCompare(b.title,"es"):sort==="oldest"?new Date(a.created_at).getTime()-new Date(b.created_at).getTime():new Date(b.created_at).getTime()-new Date(a.created_at).getTime());
 async function duplicateArticle(article:Article){
@@ -28,6 +37,7 @@ return <main className="container main editorial-dashboard"><div className="sect
     <button type="button" className="secondary-button" onClick={()=>void duplicateArticle(a)}>Duplicar como borrador</button>
     {a.status==="published" ? <Link href={`/noticias/${a.slug}`} target="_blank" rel="noopener noreferrer">Ver publicada ↗</Link> : null}
     {role==="admin" && a.status==="published" ? <button type="button" className="secondary-button" onClick={()=>void featureArticle(a.id)} disabled={!!a.is_featured}>{a.is_featured?"Destacada":"Destacar"}</button> : null}
+    {role==="admin" && a.status==="published" ? <button type="button" className="secondary-button" onClick={()=>void unpublishArticle(a.id,a.title)}>Retirar publicación</button> : null}
     {role==="admin" ? <button type="button" className="secondary-button" onClick={()=>void removeArticle(a.id,a.title)}>Enviar a papelera</button> : null}
   </div>
 )}
