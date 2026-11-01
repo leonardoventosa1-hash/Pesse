@@ -13,7 +13,7 @@ function discardRecovery(){if(draftKey.current)window.sessionStorage.removeItem(
 useEffect(()=>{if(!ready)return;const onSave=(event:KeyboardEvent)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="s"){event.preventDefault();if(!busy&&!uploading)editorForm.current?.requestSubmit()}};window.addEventListener("keydown",onSave);return()=>window.removeEventListener("keydown",onSave)},[ready,busy,uploading]);
 function exportMarkdown(){
  const safeName=(slugify(slug||title)||"noticia").slice(0,80);
- const article=["# "+(title.trim()||"Noticia sin título"),"",excerpt.trim(), "",body.trim(),"", "Categoría: "+(categories.find(c=>c.id===category)?.name??"Sin categoría"),"Estado: "+(status==="published"?"Publicada":"Borrador"),"Imagen: "+cover.trim()].join("\\n");
+ const article=["# "+(title.trim()||"Noticia sin título"),"",excerpt.trim(), "",body.trim(),"", "Categoría: "+(categories.find(c=>c.id===category)?.name??"Sin categoría"),"Estado: "+(status==="published"?"Publicada":"Borrador"),"Imagen: "+cover.trim()].join("\n");
  const file=new Blob([article],{type:"text/markdown;charset=utf-8"});
  const url=URL.createObjectURL(file);
  const link=document.createElement("a");link.href=url;link.download=safeName+".md";document.body.appendChild(link);link.click();link.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1000);
