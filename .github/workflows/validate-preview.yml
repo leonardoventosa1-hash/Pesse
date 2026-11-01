@@ -1,0 +1,36 @@
+name: Validate Pesse preview
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Check SQL function delimiters
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          sql = Path("supabase/migrations/20261031_recycle_bin.sql").read_text()
+          quoted = sql.split("$$")
+          if len(quoted) != 9:
+              raise SystemExit("Expected four complete SQL function bodies (8 $$ delimiters)")
+          if any("create or replace function" in quoted[i] for i in range(1,len(quoted),2)):
+              raise SystemExit("Unexpected nested function definition")
+          for i in range(0,len(quoted),2):
+              if "$" in quoted[i]:
+                  raise SystemExit("Malformed single-dollar SQL delimiter")
+          print("Four SQL function bodies properly dollar-quoted")
+          PY
+      - name: TypeScript validation
+        run: npm run check
+      - name: Next.js production build
+        run: npm run build
