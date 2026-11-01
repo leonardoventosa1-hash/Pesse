@@ -23,6 +23,18 @@ jobs:
               echo "::error::Published site returned HTTP ${status} for ${path}"
               exit 1
             fi
+            if grep -Eqi 'Authentication Required|Vercel Authentication|Log in to Vercel' /tmp/pesse-body; then
+              echo "::error::Vercel authentication is blocking public access to ${path}"
+              exit 1
+            fi
+            if [[ "${path}" == "/" ]] && ! grep -qi 'Pesse' /tmp/pesse-body; then
+              echo "::error::Homepage is missing Pesse branding"
+              exit 1
+            fi
+            if [[ "${path}" == "/robots.txt" ]] && ! grep -q 'sitemap.xml' /tmp/pesse-body; then
+              echo "::error::robots.txt does not advertise the sitemap"
+              exit 1
+            fi
             if [[ "${path}" == "/buscar" ]] && ! grep -qi 'Buscar noticias' /tmp/pesse-body; then
               echo "::error::Published search page does not contain its expected heading"
               exit 1
