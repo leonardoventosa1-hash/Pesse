@@ -1,28 +1,24 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
 import type {Metadata} from "next";
-import {publicArticles} from "@/lib/articles";
+import {supabase} from "@/lib/supabase";
 
 export const metadata:Metadata={title:"Buscar noticias | Pesse",description:"Buscá noticias y coberturas de Pesse por título y contenido."};
 
-const normalizeSearch=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("es");
-
+type SearchHit={id:string;slug:string;title:string;excerpt:string|null;cover_url:string|null;published_at:string|null};
 export default async function Buscar({searchParams}:{searchParams:Promise<{q?:string;page?:string}>}){
  const {q="",page="1"}=await searchParams;
- const query=q.trim().slice(0,120);
- const normalized=normalizeSearch(query);
- const articles=query.length>=2?(await publicArticles(300)).filter(a=>
-  [a.title,a.excerpt,a.body].some(value=>normalizeSearch(value??"").includes(normalized))
- ):[];
- // Prioritize headlines, then summaries, then article text, preserving recency for equal scores.
- const relevance=(a:(typeof articles)[number])=>normalizeSearch(a.title).includes(normalized)?3:normalizeSearch(a.excerpt??"").includes(normalized)?2:1;
- articles.sort((a,b)=>relevance(b)-relevance(a));
- const perPage=12;
+ const query=typeof q==="string"?q.trim().slice(0,120):"";
  const requestedPage=Number(page);
- const currentPage=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,100):1;
- const totalPages=Math.max(1,Math.ceil(articles.length/perPage));
- const selectedPage=Math.min(currentPage,totalPages);
- const visibleArticles=articles.slice((selectedPage-1)*perPage,selectedPage*perPage);
+ const perPage=12;
+ const currentPage=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,10000):1;
+ const db=supabase();
+ const response=query.length>=2&&db?await db.rpc("search_pesse_articles",{search_term:query,page_number:currentPage,page_size:perPage}):null;
+ const failed=Boolean(response?.error);
+ const result=response?.data as {items?:SearchHit[];total?:number}|null;
+ const articles=result?.items??[];
+ const total=Number(result?.total??0);
+ const totalPages=Math.max(1,Math.ceil(total/perPage));
  const pageUrl=(n:number)=>"/buscar?q="+encodeURIComponent(query)+"&page="+n;
  return <main className="container main">
   <div className="eyebrow">ARCHIVO PESSE</div><h1>Buscar noticias</h1>
@@ -36,16 +32,16 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
   </form>
   {query.length===0?<p className="muted">Ingresá al menos dos caracteres para empezar.</p>:
    query.length<2?<p role="status" className="muted">Escribí al menos dos caracteres.</p>:
-   <><p role="status" className="news-list-intro">{articles.length} {articles.length===1?"resultado":"resultados"} para <strong>“{query}”</strong></p>
-    {articles.length===0?<p className="muted">No encontramos noticias que coincidan. Probá con otra palabra.</p>:
-     <div className="news-grid">{visibleArticles.map(a=><Link className="news-card" href={`/noticias/${a.slug}`} key={a.id}>
+   <><p role="status" className="news-list-intro">{total} {total===1?"resultado":"resultados"} para <strong>“{query}”</strong></p>
+    {failed?<p role="alert" className="muted">No pudimos completar la búsqueda en este momento. Intentá nuevamente.</p>:articles.length===0?<p className="muted">No encontramos noticias que coincidan. Probá con otra palabra.</p>:
+     <div className="news-grid">{articles.map(a=><Link className="news-card" href={`/noticias/${a.slug}`} key={a.id}>
       {a.cover_url&&<img src={a.cover_url} alt=""/>}
       <div className="news-card-content"><span className="eyebrow">ACTUALIDAD</span><h2>{a.title}</h2><p>{a.excerpt}</p></div>
      </Link>)}</div>}
-     {articles.length>perPage&&<nav aria-label="Páginas de resultados" className="news-search-pagination" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:16,marginTop:30}}>
-       {selectedPage>1?<Link className="secondary-button" href={pageUrl(selectedPage-1)}>← Anterior</Link>:null}
-       <span>Página {selectedPage} de {totalPages}</span>
-       {selectedPage<totalPages?<Link className="secondary-button" href={pageUrl(selectedPage+1)}>Siguiente →</Link>:null}
+     {!failed&&total>perPage&&<nav aria-label="Páginas de resultados" className="news-search-pagination" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:16,marginTop:30}}>
+       {currentPage>1?<Link className="secondary-button" href={pageUrl(currentPage-1)}>← Anterior</Link>:null}
+       <span>Página {currentPage} de {totalPages}</span>
+       {currentPage<totalPages?<Link className="secondary-button" href={pageUrl(currentPage+1)}>Siguiente →</Link>:null}
      </nav>}</>}
  </main>;
 }
