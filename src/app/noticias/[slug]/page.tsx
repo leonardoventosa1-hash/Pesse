@@ -8,7 +8,15 @@ import ShareArticle from "@/components/ShareArticle";
 import type {Metadata} from "next";
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{
  const {slug}=await params;const article=await articleBySlug(slug);
- return article?{title:article.title,description:article.excerpt,openGraph:{type:"article",title:article.title,description:article.excerpt,images:article.cover_url?[article.cover_url]:[]}}:{title:"Noticia no encontrada"};
+ if(!article)return {title:"Noticia no encontrada",robots:{index:false,follow:false}};
+ const url=(process.env.NEXT_PUBLIC_SITE_URL||"https://pesse-gilt.vercel.app").replace(/\/$/,"")+"/noticias/"+encodeURIComponent(article.slug);
+ return {
+  title:article.title,
+  description:article.excerpt,
+  alternates:{canonical:url},
+  openGraph:{type:"article",url,siteName:"Pesse",locale:"es_AR",title:article.title,description:article.excerpt,publishedTime:article.published_at??undefined,images:article.cover_url?[{url:article.cover_url,alt:article.title}]:[]},
+  twitter:{card:article.cover_url?"summary_large_image":"summary",title:article.title,description:article.excerpt,images:article.cover_url?[article.cover_url]:[]}
+ };
 }
 function estimatedReadingMinutes(body:string):number {
  const plain=body.replace(/<[^>]*>/g," ").replace(/[#*_~\x60>[\]()!]/g," ");
