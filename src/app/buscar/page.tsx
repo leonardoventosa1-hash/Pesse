@@ -12,6 +12,9 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
  const articles=query.length>=2?(await publicArticles(300)).filter(a=>
   [a.title,a.excerpt,a.body].some(value=>(value??"").toLocaleLowerCase("es").includes(normalized))
  ):[];
+ // Prioritize headlines, then summaries, then article text, preserving recency for equal scores.
+ const relevance=(a:(typeof articles)[number])=>a.title.toLocaleLowerCase("es").includes(normalized)?3:(a.excerpt??"").toLocaleLowerCase("es").includes(normalized)?2:1;
+ articles.sort((a,b)=>relevance(b)-relevance(a));
  const perPage=12;
  const requestedPage=Number(page);
  const currentPage=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,100):1;
