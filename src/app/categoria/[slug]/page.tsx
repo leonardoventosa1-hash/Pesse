@@ -16,7 +16,7 @@ export default async function Categoria({params}:{params:Promise<{slug:string}>}
  const db=supabase();
  const {data:category}=db?await db.from("categories").select("id,name").eq("slug",slug).maybeSingle():{data:null};
  if(!category){if(db)notFound();return <main className="container main"><h1>Sección en preparación</h1><p>Falta conectar la base de datos.</p></main>}
- const {data}=await db!.from("articles").select("id,slug,title,excerpt,cover_url,status,published_at,created_at").eq("category_id",category.id).eq("status","published").lte("published_at",new Date().toISOString()).order("published_at",{ascending:false}).limit(50);
+ const {data}=await db!.from("articles").select("id,slug,title,excerpt,cover_url,status,published_at,created_at").eq("category_id",category.id).eq("status","published").is("deleted_at",null).lte("published_at",new Date().toISOString()).order("published_at",{ascending:false}).limit(50);
  const articles=(data??[]) as Article[];
  const lead=articles[0];
  return <main className="container main category-landing">
