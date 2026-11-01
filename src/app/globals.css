@@ -229,3 +229,10 @@ body{background:var(--paper);color:var(--ink)}
 .article-meta-line{display:flex;flex-wrap:wrap;align-items:center;gap:12px;color:#68776f;font-size:13px}.article-meta-line .article-date{margin:0}
 
 .reader-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 24px;padding:12px 0;border-bottom:1px solid #d8ded9}.reader-controls span{font-size:13px;font-weight:700;margin-right:auto}.reader-controls button{border:1px solid #b4c1b8;border-radius:4px;background:#fff;color:#17231e;padding:8px 14px;cursor:pointer;font-weight:800}.reader-controls button:disabled{opacity:.4;cursor:not-allowed}.reader-controls button:focus-visible{outline:3px solid #6d9e85;outline-offset:2px}.reader-size-0{font-size:16px}.reader-size-1{font-size:18px}.reader-size-2{font-size:21px}.reader-section .article-body p,.reader-section .article-body li{font-size:inherit;line-height:1.75}
+
+/* Keyboard navigation and reduced-motion accessibility */
+.skip-to-content{position:fixed;left:16px;top:12px;z-index:9999;transform:translateY(-160%);padding:12px 18px;border-radius:4px;background:#fff;color:#162a23;font-weight:800;box-shadow:0 3px 12px rgba(0,0,0,.25)}
+.skip-to-content:focus{transform:translateY(0);outline:3px solid #a8d3b8;outline-offset:2px}
+#contenido-principal:focus{outline:none}
+:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid #6cb68f;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
