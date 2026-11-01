@@ -1,0 +1,34 @@
+name: Verify published Pesse site
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  live-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check live homepage, search, and sitemap
+        shell: bash
+        env:
+          BASE_URL: https://pesse-gilt.vercel.app
+        run: |
+          set -euo pipefail
+          for path in / /buscar /sitemap.xml /robots.txt; do
+            echo "Checking ${BASE_URL}${path}"
+            status=$(curl --location --silent --show-error --max-time 25 --output /tmp/pesse-body --write-out '%{http_code}' "${BASE_URL}${path}")
+            echo "HTTP ${status}"
+            if [[ "${status}" != "200" ]]; then
+              echo "::error::Published site returned HTTP ${status} for ${path}"
+              exit 1
+            fi
+            if [[ "${path}" == "/buscar" ]] && ! grep -qi 'Buscar noticias' /tmp/pesse-body; then
+              echo "::error::Published search page does not contain its expected heading"
+              exit 1
+            fi
+            if [[ "${path}" == "/sitemap.xml" ]] && ! grep -q '<urlset' /tmp/pesse-body; then
+              echo "::error::Published sitemap does not contain an XML URL set"
+              exit 1
+            fi
+          done
