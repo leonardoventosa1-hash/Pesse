@@ -37,20 +37,20 @@ jobs:
         run: |
           psql -v ON_ERROR_STOP=1 <<'SQL'
           create function public.guard_article_featured()
-          returns trigger language plpgsql security definer set search_path='' as $
+          returns trigger language plpgsql security definer set search_path='' as $ci_feature$
           begin
             return new;
-          end $;
+          end $ci_feature$;
           SQL
           psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261031_guard_featured_permissions.sql
           psql -v ON_ERROR_STOP=1 <<'SQL'
-          do $
+          do $ci_check$
           begin
             if has_function_privilege('anon','public.guard_article_featured()','EXECUTE')
                or has_function_privilege('authenticated','public.guard_article_featured()','EXECUTE') then
               raise exception 'Featured internal trigger exposed';
             end if;
-          end $;
+          end $ci_feature$;
           SQL
       - name: Ensure published articles are visible to anonymous visitors
         run: |
