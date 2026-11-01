@@ -33,6 +33,16 @@ export default async function ArticlePage({params}:{params:Promise<{slug:string}
  const category=categoryResult.data;
  const more=related.filter(a=>a.id!==article.id&&(article.category_id?a.category_id===article.category_id:true)).slice(0,3);
  return <main className="container main article-page editorial-article">
+  <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({
+    "@context":"https://schema.org",
+    "@type":"NewsArticle",
+    headline:article.title,
+    description:article.excerpt,
+    datePublished:article.published_at,
+    image:article.cover_url?[article.cover_url]:undefined,
+    mainEntityOfPage:(process.env.NEXT_PUBLIC_SITE_URL||"https://pesse-gilt.vercel.app").replace(/\/$/,"")+"/noticias/"+encodeURIComponent(article.slug),
+    publisher:{"@type":"Organization",name:"Pesse"}
+  }).replace(/</g,"\\u003c")}}/>
   <Link href="/noticias" className="more-link">← Todas las noticias</Link>
   <div className="article-heading"><div className="eyebrow">{category?<Link href={`/categoria/${category.slug}`}>{category.name}</Link>:"PESSE · ACTUALIDAD"}</div>
   <h1>{article.title}</h1><p className="lead">{article.excerpt}</p>
