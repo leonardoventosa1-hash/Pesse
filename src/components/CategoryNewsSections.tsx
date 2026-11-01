@@ -8,7 +8,7 @@ export default function CategoryNewsSections({articles,categories}:{articles:Art
   {groups.map(({category,items})=><section className="category-news-group" key={category.id}>
    <div className="category-news-heading"><h3>{category.name}</h3><Link href={`/categoria/${category.slug}`} className="more-link">Ver sección ↗</Link></div>
    <div className="category-news-grid">{items.map(article=><Link key={article.id} className="category-news-card" href={`/noticias/${article.slug}`}>
-   {article.cover_url?<img src={article.cover_url} alt="" loading="lazy"/>:<div className="category-news-placeholder">P.</div>}
+   {article.cover_url?<img src={article.cover_url} alt="" width={640} height={360} loading="lazy" decoding="async"/>:<div className="category-news-placeholder">P.</div>}
    <div className="category-news-content"><span className="eyebrow">{category.name}</span><h4>{article.title}</h4>{article.excerpt&&<p>{article.excerpt}</p>}</div>
    </Link>)}</div>
   </section>)}
