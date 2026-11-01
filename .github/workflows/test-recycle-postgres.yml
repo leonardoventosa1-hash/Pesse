@@ -61,6 +61,12 @@ jobs:
             if not exists(select 1 from public.articles where deleted_at is null and status='draft' and published_at is null) then
               raise exception 'Restore did not return article as draft';
             end if;
+            if has_function_privilege('anon','public.guard_article_trash()','EXECUTE') or
+               has_function_privilege('authenticated','public.guard_article_trash()','EXECUTE') or
+               has_function_privilege('anon','public.prevent_client_article_delete()','EXECUTE') or
+               has_function_privilege('authenticated','public.prevent_client_article_delete()','EXECUTE') then
+              raise exception 'Internal trigger functions are exposed as RPC';
+            end if;
             if has_function_privilege('anon','public.trash_article(uuid)','EXECUTE') then
               raise exception 'Anonymous user must not execute trash';
             end if;
