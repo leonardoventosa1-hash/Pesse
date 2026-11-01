@@ -5,15 +5,17 @@ import {publicArticles} from "@/lib/articles";
 
 export const metadata:Metadata={title:"Buscar noticias | Pesse",description:"Buscá noticias y coberturas de Pesse por título y contenido."};
 
+const normalizeSearch=(value:string)=>value.normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLocaleLowerCase("es");
+
 export default async function Buscar({searchParams}:{searchParams:Promise<{q?:string;page?:string}>}){
  const {q="",page="1"}=await searchParams;
  const query=q.trim().slice(0,120);
- const normalized=query.toLocaleLowerCase("es");
+ const normalized=normalizeSearch(query);
  const articles=query.length>=2?(await publicArticles(300)).filter(a=>
-  [a.title,a.excerpt,a.body].some(value=>(value??"").toLocaleLowerCase("es").includes(normalized))
+  [a.title,a.excerpt,a.body].some(value=>normalizeSearch(value??"").includes(normalized))
  ):[];
  // Prioritize headlines, then summaries, then article text, preserving recency for equal scores.
- const relevance=(a:(typeof articles)[number])=>a.title.toLocaleLowerCase("es").includes(normalized)?3:(a.excerpt??"").toLocaleLowerCase("es").includes(normalized)?2:1;
+ const relevance=(a:(typeof articles)[number])=>normalizeSearch(a.title).includes(normalized)?3:normalizeSearch(a.excerpt??"").includes(normalized)?2:1;
  articles.sort((a,b)=>relevance(b)-relevance(a));
  const perPage=12;
  const requestedPage=Number(page);
