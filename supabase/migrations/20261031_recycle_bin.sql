@@ -70,6 +70,9 @@ drop trigger if exists trg_prevent_client_article_delete on public.articles;
 create trigger trg_prevent_client_article_delete before delete on public.articles
 for each row execute function public.prevent_client_article_delete();
 
+-- Trigger handlers are internal, not RPC endpoints. Triggers can run regardless of client EXECUTE grants.
+revoke all on function public.guard_article_trash() from public,anon,authenticated;
+revoke all on function public.prevent_client_article_delete() from public,anon,authenticated;
 revoke all on function public.trash_article(uuid) from public,anon;
 revoke all on function public.restore_article(uuid) from public,anon;
 grant execute on function public.trash_article(uuid) to authenticated;
