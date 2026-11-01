@@ -1,6 +1,8 @@
 name: Verify published Pesse site
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "17 11 * * *"
   push:
     branches: [main]
 permissions:
@@ -15,7 +17,7 @@ jobs:
           BASE_URL: https://pesse-gilt.vercel.app
         run: |
           set -euo pipefail
-          for path in / /buscar /sitemap.xml /robots.txt; do
+          for path in / /buscar "/buscar?q=pesse" /sitemap.xml /robots.txt /rss.xml; do
             echo "Checking ${BASE_URL}${path}"
             status=$(curl --location --silent --show-error --max-time 25 --output /tmp/pesse-body --write-out '%{http_code}' "${BASE_URL}${path}")
             echo "HTTP ${status}"
@@ -37,6 +39,10 @@ jobs:
             fi
             if [[ "${path}" == "/buscar" ]] && ! grep -qi 'Buscar noticias' /tmp/pesse-body; then
               echo "::error::Published search page does not contain its expected heading"
+              exit 1
+            fi
+            if [[ "${path}" == "/rss.xml" ]] && ! grep -q '<rss' /tmp/pesse-body; then
+              echo "::error::RSS feed is not available"
               exit 1
             fi
             if [[ "${path}" == "/sitemap.xml" ]] && ! grep -q '<urlset' /tmp/pesse-body; then
