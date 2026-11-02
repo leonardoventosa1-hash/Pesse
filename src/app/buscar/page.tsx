@@ -22,7 +22,8 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
  const failed=query.length>=2&&(!db||Boolean(response?.error));
  const result=response?.data as {items?:SearchHit[];total?:number}|null;
  const articles=result?.items??[];
- const total=Number(result?.total??0);
+ const reportedTotal=Number(result?.total??0);
+ const total=Number.isSafeInteger(reportedTotal)&&reportedTotal>=0?reportedTotal:0;
  const totalPages=Math.max(1,Math.ceil(total/perPage));
  const outOfRange=total>0&&currentPage>totalPages;
  const pageUrl=(n:number)=>"/buscar?q="+encodeURIComponent(query)+"&page="+n;
@@ -40,7 +41,7 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
    query.length<2?<p role="status" className="muted">Escribí al menos dos caracteres.</p>:
    <>{!failed&&<p role="status" className="news-list-intro">{total} {total===1?"resultado":"resultados"} para <strong>“{query}”</strong></p>}
     {failed?<p role="alert" className="muted">No pudimos completar la búsqueda en este momento. Intentá nuevamente.</p>:outOfRange?<p className="muted">Esta página no existe. <Link href={pageUrl(1)}>Volver a la primera página de resultados</Link>.</p>:articles.length===0?<p className="muted">No encontramos noticias que coincidan. Probá con otra palabra.</p>:
-     <div className="news-grid">{articles.map(a=><Link className="news-card" href={`/noticias/${a.slug}`} key={a.id}>
+     <div className="news-grid">{articles.map(a=><Link className="news-card" href={`/noticias/${encodeURIComponent(a.slug)}`} key={a.id}>
       {a.cover_url&&<img src={a.cover_url} alt=""/>}
       <div className="news-card-content"><span className="eyebrow">ACTUALIDAD</span><h2>{a.title}</h2><p>{a.excerpt}</p></div>
      </Link>)}</div>}
