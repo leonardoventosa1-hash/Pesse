@@ -14,7 +14,7 @@ type SearchHit={id:string;slug:string;title:string;excerpt:string|null;cover_url
 export default async function Buscar({searchParams}:{searchParams:Promise<{q?:string;page?:string}>}){
  const {q="",page="1"}=await searchParams;
  const query=typeof q==="string"?q.trim().slice(0,120):"";
- const requestedPage=Number(page);
+ const requestedPage=typeof page==="string"&&/^\d{1,5}$/.test(page)?Number(page):1;
  const perPage=12;
  const currentPage=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,10000):1;
  const db=supabase();
