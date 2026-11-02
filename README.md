@@ -58,3 +58,12 @@ Antes de habilitarla:
 - La rama `main` es la base estable de integración; preparar cambios en ramas y revisarlos antes de fusionar.
 
 Este documento resume el estado del código al **1 de noviembre de 2026**. Las comprobaciones de despliegue y Supabase deben registrarse por separado.
+
+## Vercel: vista previa y publicación controlada
+
+- Proyecto identificado en Vercel: **pesse**. Dominio público actual: [pesse-gilt.vercel.app](https://pesse-gilt.vercel.app/).
+- La rama de integración `integration/editorial-improvements-53-59` genera despliegues **Preview** en Vercel. Estos despliegues no publican automáticamente los cambios en el dominio de producción.
+- Las vistas previas pueden estar protegidas por inicio de sesión de Vercel (SSO); un build **READY** no confirma por sí solo las funciones con Supabase.
+- Las redes oficiales en el footer son [Instagram](https://www.instagram.com/pesse.info/), [Facebook](https://www.facebook.com/share/1Bu3f2ArLs/), [YouTube](https://www.youtube.com/@pesseinfo) y [TikTok](https://www.tiktok.com/@pesse.info). **No incluir X.** Se pueden reemplazar mediante variables `NEXT_PUBLIC_PESSE_*` con URL HTTPS válida.
+- **Antes de fusionar a `main` o promocionar un despliegue:** comprobar CI, abrir la vista previa, validar navegación móvil, enlaces externos, búsqueda, RSS y flujos reales con Supabase autorizado, además de tener un plan de reversión.
+- El PR de la papelera **#18** sigue bloqueado para producción hasta realizar las verificaciones de base de datos detalladas arriba.
