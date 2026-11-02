@@ -236,3 +236,10 @@ body{background:var(--paper);color:var(--ink)}
 #contenido-principal:focus{outline:none}
 :where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid #6cb68f;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Social links in the public footer */
+.footer-social{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin-left:auto}
+.footer-social a{font-size:13px;font-weight:700;color:#fff;text-decoration:underline;text-underline-offset:4px}
+.footer-social a:hover{color:#a8d3b8}
+.footer-social a:focus-visible{outline:3px solid #a8d3b8;outline-offset:4px}
+@media(max-width:700px){.footer-social{margin-left:0;width:100%}}
