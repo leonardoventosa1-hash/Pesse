@@ -3,7 +3,12 @@ import Link from "next/link";
 import type {Metadata} from "next";
 import {supabase} from "@/lib/supabase";
 
-export const metadata:Metadata={title:"Buscar noticias | Pesse",description:"Buscá noticias y coberturas de Pesse por título y contenido."};
+export async function generateMetadata({searchParams}:{searchParams:Promise<{q?:string;page?:string}>}):Promise<Metadata>{
+ const {q,page}=await searchParams;
+ const hasQuery=typeof q==="string"&&q.trim().length>0;
+ const hasPage=typeof page==="string"&&page!=="1"&&page!=="";
+ return {title:"Buscar noticias | Pesse",description:"Buscá noticias y coberturas de Pesse por título y contenido.",robots:hasQuery||hasPage?{index:false,follow:true}:undefined,alternates:{canonical:"/buscar"}};
+}
 
 type SearchHit={id:string;slug:string;title:string;excerpt:string|null;cover_url:string|null;published_at:string|null};
 export default async function Buscar({searchParams}:{searchParams:Promise<{q?:string;page?:string}>}){
