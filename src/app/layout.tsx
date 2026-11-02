@@ -7,8 +7,7 @@ const socialPlatforms=[
  {label:"Instagram",env:process.env.NEXT_PUBLIC_PESSE_INSTAGRAM,host:"instagram.com"},
  {label:"Facebook",env:process.env.NEXT_PUBLIC_PESSE_FACEBOOK,host:"facebook.com"},
  {label:"YouTube",env:process.env.NEXT_PUBLIC_PESSE_YOUTUBE,host:"youtube.com"},
- {label:"TikTok",env:process.env.NEXT_PUBLIC_PESSE_TIKTOK,host:"tiktok.com"},
- {label:"X",env:process.env.NEXT_PUBLIC_PESSE_X,host:"x.com"}
+ {label:"TikTok",env:process.env.NEXT_PUBLIC_PESSE_TIKTOK,host:"tiktok.com"}
 ];
 const socialLinks=socialPlatforms.flatMap(({label,env,host})=>{
  if(!env)return [];
