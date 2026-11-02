@@ -243,3 +243,9 @@ body{background:var(--paper);color:var(--ink)}
 .footer-social a:hover{color:#a8d3b8}
 .footer-social a:focus-visible{outline:3px solid #a8d3b8;outline-offset:4px}
 @media(max-width:700px){.footer-social{margin-left:0;width:100%}}
+
+/* Accessible branded social chips, including small-screen layout */
+.footer-social .footer-social-link{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid rgba(255,255,255,.25);border-radius:999px;text-decoration:none;min-height:40px;transition:background-color .15s ease,border-color .15s ease}
+.footer-social .footer-social-link:hover{background:rgba(255,255,255,.12);border-color:#a8d3b8}
+.footer-social-symbol{display:inline-flex;align-items:center;justify-content:center;min-width:19px;font-size:17px;font-weight:900;line-height:1}
+@media(max-width:700px){.footer-social{justify-content:flex-start;gap:8px}.footer-social .footer-social-link{padding:9px 12px}}
