@@ -33,7 +33,7 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
   </form>
   {query.length===0?<p className="muted">Ingresá al menos dos caracteres para empezar.</p>:
    query.length<2?<p role="status" className="muted">Escribí al menos dos caracteres.</p>:
-   <><p role="status" className="news-list-intro">{total} {total===1?"resultado":"resultados"} para <strong>“{query}”</strong></p>
+   <>{!failed&&<p role="status" className="news-list-intro">{total} {total===1?"resultado":"resultados"} para <strong>“{query}”</strong></p>}
     {failed?<p role="alert" className="muted">No pudimos completar la búsqueda en este momento. Intentá nuevamente.</p>:outOfRange?<p className="muted">Esta página no existe. <Link href={pageUrl(1)}>Volver a la primera página de resultados</Link>.</p>:articles.length===0?<p className="muted">No encontramos noticias que coincidan. Probá con otra palabra.</p>:
      <div className="news-grid">{articles.map(a=><Link className="news-card" href={`/noticias/${a.slug}`} key={a.id}>
       {a.cover_url&&<img src={a.cover_url} alt=""/>}
