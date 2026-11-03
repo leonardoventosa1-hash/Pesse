@@ -3,8 +3,8 @@ import {useState} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {usePathname} from "next/navigation";
-const categories=[["Política","politica"],["Sociedad","sociedad"],["Deportes","deportes"],["Cultura","cultura"],["Música","musica"],["Turismo","turismo"],["Entretenimiento","entretenimiento"]];
-export default function SiteNavigation(){
+import type {NavigationCategory} from "@/lib/categories";
+export default function SiteNavigation({categories}:{categories:NavigationCategory[]}){
  const [open,setOpen]=useState(false);const pathname=usePathname();
  return <>
  <nav className="container nav" aria-label="Navegación principal">
@@ -14,8 +14,8 @@ export default function SiteNavigation(){
  <Link href="/" aria-current={pathname==="/"?"page":undefined} onClick={()=>setOpen(false)}>Inicio</Link>
  <Link href="/noticias" aria-current={pathname==="/noticias"?"page":undefined} onClick={()=>setOpen(false)}>Últimas noticias</Link>
  <Link href="/buscar" aria-current={pathname==="/buscar"?"page":undefined} onClick={()=>setOpen(false)}>Buscar</Link>
- {categories.map(([label,slug])=><Link className="mobile-category-link" key={slug} href={`/categoria/${slug}`} aria-current={pathname===`/categoria/${slug}`?"page":undefined} onClick={()=>setOpen(false)}>{label}</Link>)}
+ {categories.map(({name:label,slug})=><Link className="mobile-category-link" key={slug} href={`/categoria/${slug}`} aria-current={pathname===`/categoria/${slug}`?"page":undefined} onClick={()=>setOpen(false)}>{label}</Link>)}
  </div></nav>
- <nav className="category-nav" aria-label="Secciones de Pesse"><div className="container category-nav-scroll">{categories.map(([label,slug])=><Link key={slug} href={`/categoria/${slug}`} aria-current={pathname===`/categoria/${slug}`?"page":undefined}>{label}</Link>)}</div></nav>
+ <nav className="category-nav" aria-label="Secciones de Pesse"><div className="container category-nav-scroll">{categories.map(({name:label,slug})=><Link key={slug} href={`/categoria/${slug}`} aria-current={pathname===`/categoria/${slug}`?"page":undefined}>{label}</Link>)}</div></nav>
  </>;
 }
