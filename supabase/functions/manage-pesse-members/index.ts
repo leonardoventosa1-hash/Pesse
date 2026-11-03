@@ -1,6 +1,6 @@
 // Pesse editorial member management. Deploy only after review and Auth redirect validation.
 // Service role is available ONLY inside the Supabase Edge runtime. Never expose it to clients.
-import { createClient } from "npm:@supabase/supabase-js@2.57.0";
+import { createClient, type User } from "npm:@supabase/supabase-js@2.57.0";
 
 const headers = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"GET, POST, OPTIONS","Content-Type":"application/json"};
 const json=(status:number,data:unknown)=>new Response(JSON.stringify(data),{status,headers});
@@ -33,7 +33,7 @@ Deno.serve(async(request:Request)=>{
    // Stop at 1,000 and report a visible warning if there may be more.
    const pageSize=100;
    const maxPages=10;
-   const allUsers: Awaited<ReturnType<typeof admin.auth.admin.listUsers>>["data"]["users"]=[];
+   const allUsers: User[]=[];
    let truncated=false;
    for(let page=1;page<=maxPages;page++){
     const {data:usersData,error:usersError}=await admin.auth.admin.listUsers({page,perPage:pageSize});
