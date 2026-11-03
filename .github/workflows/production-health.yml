@@ -1,0 +1,21 @@
+name: Pesse production health
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 * * * *"
+permissions:
+  contents: read
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check production readiness
+        env:
+          PESSE_URL: https://pesse-gilt.vercel.app/api/health
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location \
+            --retry 2 --retry-delay 5 --connect-timeout 10 --max-time 25 \
+            --header 'Accept: application/json' "$PESSE_URL" -o health.json
+          node -e 'const fs=require("fs"); const x=JSON.parse(fs.readFileSync("health.json","utf8")); if(x.status!=="ok"||!x.checks||Object.values(x.checks).some(v=>v!==true)){console.error("Pesse is not healthy");process.exit(1)} console.log("Pesse production ready")'
