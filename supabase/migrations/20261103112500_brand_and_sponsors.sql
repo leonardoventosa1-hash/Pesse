@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS public.sponsor_banners(
  ends_at timestamptz,
  created_at timestamptz NOT NULL DEFAULT now(),
  updated_at timestamptz NOT NULL DEFAULT now(),
- CONSTRAINT sponsor_dates_valid CHECK (ends_at IS NULL OR (starts_at IS NOT NULL AND ends_at>starts_at))
+ CONSTRAINT sponsor_dates_valid CHECK (ends_at IS NULL OR (starts_at IS NOT NULL AND ends_at>starts_at)),
+ CONSTRAINT sponsor_scheduled_requires_start CHECK (status<>'scheduled' OR starts_at IS NOT NULL)
 );
 CREATE INDEX IF NOT EXISTS sponsor_banners_live_idx ON public.sponsor_banners (placement,status,starts_at,ends_at);
 ALTER TABLE public.sponsor_banners ENABLE ROW LEVEL SECURITY;
@@ -30,13 +31,7 @@ REVOKE ALL ON public.sponsor_banners FROM PUBLIC,anon,authenticated;
 GRANT SELECT ON public.sponsor_banners TO anon,authenticated;
 GRANT INSERT (advertiser_name,alt_text,image_path,target_url,placement,status,starts_at,ends_at) ON public.sponsor_banners TO authenticated;
 GRANT UPDATE (advertiser_name,alt_text,image_path,target_url,placement,status,starts_at,ends_at,updated_at) ON public.sponsor_banners TO authenticated;
-DROP POLICY IF EXISTS "public sees active sponsors" ON public.sponsor_banners;
-CREATE POLICY "public sees active sponsors" ON public.sponsor_banners FOR SELECT TO anon,authenticated
- USING (
-  (status='scheduled' AND starts_at IS NOT NULL AND starts_at<=now() AND (ends_at IS NULL OR ends_at>now()))
-  OR (SELECT public.is_admin())
- );
--- Anon cannot EXECUTE is_admin(); split policies to avoid privilege errors.
+-- Anonymous access stays limited to scheduled, currently active records.
 DROP POLICY IF EXISTS "public sees active sponsors" ON public.sponsor_banners;
 CREATE POLICY "public sees active sponsors" ON public.sponsor_banners FOR SELECT TO anon,authenticated
  USING (status='scheduled' AND starts_at IS NOT NULL AND starts_at<=now() AND (ends_at IS NULL OR ends_at>now()));
