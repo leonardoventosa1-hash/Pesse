@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import {homepageArticles,publicArticles} from "@/lib/articles";
 import {getNavigationCategories} from "@/lib/categories";
@@ -6,4 +7,87 @@ import HomepageBlocks from "@/components/HomepageBlocks";
 import {getHomepageSections} from "@/lib/homepage-sections";
 import {getSiteSettings} from "@/lib/site-settings";
 import SponsorPlacement from "@/components/SponsorPlacement";
-export default async function Home(){const [articles,settings]=await Promise.all([homepageArticles(6),getSiteSettings()]);const [allArticles,categories,homepageSections]=await Promise.all([publicArticles(48),getNavigationCategories(),getHomepageSections()]);return <><section className="topline"><div className="container topline-inner"><span>PERIODISMO DIGITAL</span><span>ARGENTINA · ACTUALIDAD</span></div></section><section className="hero editorial-hero"><div className="container hero-grid"><div><div className="eyebrow">INFORMACIÓN · CONTEXTO · ACTUALIDAD</div><h1>{settings.hero_title} <em>{settings.hero_emphasis}</em></h1><p>{settings.hero_description}</p><Link className="primary-button" href="/noticias">Explorar noticias <span aria-hidden="true">↗</span></Link></div><div className="hero-aside"><span className="aside-index">PESSE / PERIODISMO DIGITAL</span><div><span className="aside-label">NUESTRA MIRADA</span><h2>Contar lo que pasa. Entender por qué.</h2><p>Una plataforma renovada para el periodismo y la conversación pública.</p></div></div></div></section><main className="container main"><div className="section-heading editorial-heading"><div><div className="eyebrow">LA AGENDA DEL DÍA</div><h2>En primer plano</h2></div><Link className="more-link" href="/noticias">Todas las noticias ↗</Link></div>{articles.length>0?<div className="front-news"><Link className="lead-story" href={`/noticias/${articles[0].slug}`}>{articles[0].cover_url?<img src={articles[0].cover_url} alt="" width={1200} height={675} loading="eager" fetchPriority="high" decoding="async"/>:<div className="lead-placeholder">P.</div>}<div className="lead-content"><span className="eyebrow">NOTICIA DESTACADA</span><h2>{articles[0].title}</h2><p>{articles[0].excerpt}</p><time className="story-date" dateTime={articles[0].published_at??undefined}>{articles[0].published_at?new Date(articles[0].published_at).toLocaleDateString("es-AR",{day:"2-digit",month:"long",year:"numeric"}):""}</time><span className="more-link">Leer noticia ↗</span></div></Link><div className="secondary-stories">{articles.slice(1,5).map(a=><Link className="secondary-story" href={`/noticias/${a.slug}`} key={a.id}>{a.cover_url&&<img src={a.cover_url} alt="" width={320} height={240} loading="lazy" decoding="async"/>}<div><span className="eyebrow">ACTUALIDAD</span><h3>{a.title}</h3><time className="story-date" dateTime={a.published_at??undefined}>{a.published_at?new Date(a.published_at).toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"}):""}</time><p>{a.excerpt}</p></div></Link>)}{articles.length===1&&<div className="secondary-empty"><span className="eyebrow">PESSE</span><h3>Las próximas historias estarán acá.</h3><p>Seguimos sumando coberturas y novedades.</p></div>}</div></div>:<div className="empty-feature"><span className="empty-icon">P.</span><div><span className="eyebrow">REDACCIÓN PESSE</span><h3>Pronto vas a encontrar las noticias acá.</h3><p>Estamos desarrollando una plataforma editorial para publicar contenidos propios, fotografías y coberturas. Todavía no hay artículos cargados.</p></div></div>}<SponsorPlacement placement="home_mid"/><HomepageBlocks articles={allArticles} categories={categories} sections={homepageSections}/><SponsorPlacement placement="home_bottom"/></main></>}
+import type {Article} from "@/lib/supabase";
+
+const formatDate=(date:string|null)=>date?new Date(date).toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"}):"";
+function StoryDate({article}:{article:Article}){
+ return article.published_at?<time className="story-date" dateTime={article.published_at}>{formatDate(article.published_at)}</time>:null;
+}
+export default async function Home(){
+ const [featured,allArticles,categories,homepageSections,settings]=await Promise.all([
+  homepageArticles(9),publicArticles(48),getNavigationCategories(),getHomepageSections(),getSiteSettings()
+ ]);
+ const lead=featured[0];
+ const secondary=featured.slice(1,5);
+ const briefs=featured.slice(5,9);
+ const categoryNames=new Map(categories.map(c=>[c.id,c.name]));
+ const sectionLabel=(article:Article)=>categoryNames.get(article.category_id??"")??"Actualidad";
+ const categoryShortcuts=categories.slice(0,5);
+ return <>
+  <section className="topline home-topline"><div className="container topline-inner"><span>PESSE · PERIODISMO DIGITAL</span><span>LA MATANZA · ZONA OESTE · ARGENTINA</span></div></section>
+  <section className="home-intro">
+   <div className="container home-intro-inner">
+    <div className="home-intro-copy">
+     <div className="home-intro-kicker"><span className="home-kicker-mark" aria-hidden="true"/> INFORMACIÓN · CONTEXTO · ACTUALIDAD</div>
+     <h1>{settings.hero_title} <em>{settings.hero_emphasis}</em></h1>
+     <p>{settings.hero_description}</p>
+    </div>
+    <div className="home-intro-aside">
+     <span className="home-intro-aside-label">LA INFORMACIÓN NUNCA SE TERMINA</span>
+     <p>Historias, voces y noticias para entender lo que pasa.</p>
+     <Link href="/noticias">Ir a las últimas noticias <span aria-hidden="true">↗</span></Link>
+    </div>
+   </div>
+  </section>
+  <main className="container main pesse-home">
+   {categoryShortcuts.length>0&&<nav aria-label="Accesos rápidos a secciones" className="home-shortcuts">
+    <span>Explorá</span>{categoryShortcuts.map(c=><Link key={c.id} href={`/categoria/${c.slug}`}>{c.name} <span aria-hidden="true">↗</span></Link>)}
+    <Link href="/buscar" className="home-shortcuts-search">Buscar noticias <span aria-hidden="true">⌕</span></Link>
+   </nav>}
+   <section className="home-cover" aria-labelledby="home-cover-title">
+    <div className="home-section-head">
+     <div><div className="eyebrow">LA AGENDA DE PESSE</div><h2 id="home-cover-title">En primer plano<span className="home-heading-dot">.</span></h2></div>
+     <Link href="/noticias" className="home-section-more">Ver todas las noticias <span aria-hidden="true">↗</span></Link>
+    </div>
+    {lead?<div className="home-cover-grid">
+     <Link className="home-cover-lead" href={`/noticias/${lead.slug}`}>
+      <div className="home-cover-media">
+       {lead.cover_url?<img src={lead.cover_url} alt="" width={1200} height={760} fetchPriority="high" loading="eager" decoding="async"/>:<div className="home-cover-placeholder" aria-hidden="true">P.</div>}
+       <span className="home-cover-lead-tag">NOTICIA DESTACADA</span>
+      </div>
+      <div className="home-cover-lead-text">
+       <div className="home-story-kicker">{sectionLabel(lead)} <span aria-hidden="true">·</span> <StoryDate article={lead}/></div>
+       <h3>{lead.title}</h3>
+       {lead.excerpt&&<p>{lead.excerpt}</p>}
+       <span className="home-story-link">Leer noticia <span aria-hidden="true">↗</span></span>
+      </div>
+     </Link>
+     <div className="home-cover-side">
+      {secondary.map((article,i)=><Link href={`/noticias/${article.slug}`} key={article.id} className="home-cover-side-story">
+       <div className="home-cover-side-text">
+        <div className="home-story-kicker">{String(i+1).padStart(2,"0")} <span aria-hidden="true">/</span> {sectionLabel(article)}</div>
+        <h3>{article.title}</h3>
+        <StoryDate article={article}/>
+       </div>
+       <div className="home-cover-side-media">{article.cover_url?<img src={article.cover_url} alt="" width={280} height={210} loading="lazy" decoding="async"/>:<span aria-hidden="true">P.</span>}</div>
+      </Link>)}
+      {secondary.length===0&&<div className="home-cover-side-empty"><span className="eyebrow">SEGUÍ EXPLORANDO</span><h3>Siempre hay algo más para descubrir.</h3><Link href="/noticias">Todas las noticias ↗</Link></div>}
+     </div>
+    </div>:<div className="home-cover-empty">
+     <span className="home-cover-placeholder" aria-hidden="true">P.</span>
+     <div><span className="eyebrow">REDACCIÓN PESSE</span><h3>Las historias empiezan acá.</h3><p>Las noticias aparecerán en esta portada cuando el equipo editorial publique sus primeras coberturas.</p><Link href="/noticias" className="home-section-more">Visitar el archivo de noticias ↗</Link></div>
+    </div>}
+   </section>
+   {briefs.length>0&&<section className="home-briefs" aria-label="Más noticias recientes">
+    <div className="home-briefs-heading"><span className="home-briefs-mark" aria-hidden="true"/> MÁS NOTICIAS</div>
+    <div className="home-briefs-grid">{briefs.map(article=><Link href={`/noticias/${article.slug}`} key={article.id} className="home-brief">
+     <span className="home-story-kicker">{sectionLabel(article)} <span aria-hidden="true">·</span> <StoryDate article={article}/></span>
+     <h3>{article.title}</h3><span className="home-brief-arrow" aria-hidden="true">↗</span>
+    </Link>)}</div>
+   </section>}
+   <SponsorPlacement placement="home_mid"/>
+   <HomepageBlocks articles={allArticles} categories={categories} sections={homepageSections}/>
+   <SponsorPlacement placement="home_bottom"/>
+  </main>
+ </>;
+}
