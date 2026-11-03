@@ -52,3 +52,12 @@ Estado: **candidato en revisión, no autorizado para producción**. Este documen
 5. Si algo falla, volver al despliegue conocido como estable y preservar los datos.
 
 **Registro de resultados:** completar cada fila con fecha, responsable, SHA, URL de evidencia y resultado antes de autorizar producción.
+
+## Verificación real — 3 de noviembre de 2026
+
+- Proyecto Supabase identificado por nombre: **Pesse** (ref `sabfvfeletrinwloyryw`). Contiene `articles`, `categories` y `editor_roles` con RLS activado; al inspeccionar había un artículo, siete categorías y un registro de rol.
+- Permisos comprobados en base de datos: como rol `anon` pueden consultarse noticias públicas y categorías; no puede ejecutar `is_admin()` ni `is_editor()`. Las funciones administrativas no son ejecutables por `anon`; sí por `authenticated`, y comprueban el rol antes de la operación. Falta prueba con sesiones reales de ambos roles.
+- Advertencias del asesor de seguridad: funciones `SECURITY DEFINER` públicas para usuarios autenticados (revisar exhaustivamente autorización antes de liberar) y protección contra contraseñas filtradas desactivada. `editor_roles` tiene RLS sin políticas de lectura; su acceso interno se efectúa mediante funciones definidas específicamente, pendiente de revisión exhaustiva.
+- Variables de la rama `integration/editorial-improvements-53-59` agregadas en Vercel para URL y clave pública anónima del proyecto Pesse, **solo con destino Preview y acotadas a esa rama**. No se modificaron las variables de producción ni se copiaron claves secretas al repositorio.
+- Vercel generó un nuevo despliegue Preview del commit `eb76d22` en estado **READY**: `https://pesse-99cnnm11x-leonardoventosa1.vercel.app`. Preview puede requerir autenticación Vercel y READY no equivale a pruebas funcionales aprobadas.
+- **Pendiente y bloqueante:** probar con una sesión real de Administrador y otra de Redactor, confirmar configuración efectiva de la conexión desde el deployment y comprobar escritura/lectura de Storage. No ejecutar migraciones de papelera #18 hasta tener respaldo y pruebas aisladas.
