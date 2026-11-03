@@ -24,3 +24,12 @@ Esta función agrega el acceso **Gestionar integrantes** al panel editorial, vis
 8. Comprobar el flujo de suspensión, restablecimiento de acceso y cambios de rol con cuentas de prueba, incluyendo que el administrador no pueda desactivarse.
 
 **Importante:** desplegar código en Preview o añadir la ruta no constituye por sí mismo una prueba de funcionamiento. No crear ni invitar cuentas reales mientras falten pruebas de correo y permisos.
+
+## Progreso de integración — 3 de noviembre de 2026
+
+- PR #62 integrado únicamente en `integration/editorial-improvements-53-59`. No se publicó en `main`.
+- Edge Function `manage-pesse-members` versión 2 activa en Supabase Pesse con `verify_jwt=true`.
+- **Permisos SQL reforzados en Supabase Pesse:** se ejecutó `REVOKE ALL PRIVILEGES ON TABLE public.editor_roles FROM authenticated`. Se verificó que SELECT y UPDATE directos están denegados, mientras que `is_editor()` e `is_admin()` siguen ejecutables para el rol autenticado.
+- **Invitaciones intencionalmente deshabilitadas** hasta configurar `PESSE_INVITE_REDIRECT_URL` con una URL HTTPS activada y permitida por Supabase Auth. La ausencia de esta variable devuelve un error controlado sin enviar correos.
+- La URL de producción actual contiene aún la versión anterior del portal. No usar el dominio público como destino de invitación hasta publicar `/admin/activar`.
+- Pendiente: verificar el correo con un usuario de prueba, RLS y permisos de Administrador/Redactor en sesiones reales, y la experiencia completa de cambio de contraseña.
