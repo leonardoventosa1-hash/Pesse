@@ -97,7 +97,16 @@ export default function Members(){
      <label>Correo electrónico<input type="email" required maxLength={254} autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="integrante@ejemplo.com"/></label>
      <label>Permisos<select value={role} onChange={e=>setRole(e.target.value as Role)}><option value="redactor">Redactor</option><option value="admin">Administrador</option></select></label>
      <p className="muted">La persona recibirá un correo para activar su cuenta. Los redactores no podrán gestionar integrantes.</p>
-     {!invitationsConfigured&&<p role="status">Las invitaciones están temporalmente deshabilitadas. Falta configurar la dirección de activación en Supabase y autorizar su URL de retorno.</p>}
+     {!invitationsConfigured&&<div role="status" style={{padding:16,border:"1px solid #d4ddd6",borderRadius:10,marginBottom:12}}>
+      <strong>Activación pendiente en Supabase</strong>
+      <p>El envío sigue deshabilitado para evitar correos con enlaces de activación incorrectos.</p>
+      <p><strong>1.</strong> En <a href="https://supabase.com/dashboard/project/sabfvfeletrinwloyryw/auth/url-configuration" target="_blank" rel="noopener noreferrer"><u>Supabase Auth → URL Configuration ↗</u></a>, configurá Site URL como <code>https://pesse-gilt.vercel.app</code> y agregá exactamente la Redirect URL:</p>
+      <p><code style={{overflowWrap:"anywhere"}}>https://pesse-gilt.vercel.app/admin/activar</code></p>
+      <p><strong>2.</strong> En <a href="https://supabase.com/dashboard/project/sabfvfeletrinwloyryw/functions" target="_blank" rel="noopener noreferrer"><u>Supabase → Edge Functions / Secrets ↗</u></a>, agregá el secreto <code>PESSE_INVITE_REDIRECT_URL</code> con esa misma URL completa.</p>
+      <p><strong>3.</strong> Revisá el proveedor de correo y el template «Invite user» en Supabase Auth. Una URL configurada no garantiza la entrega de correos; antes de invitar al equipo, probá con un buzón controlado.</p>
+      <button type="button" className="secondary-button" disabled={busy||loading} onClick={()=>void refresh()}>Comprobar si quedó configurada</button>
+     </div>}
+     {invitationsConfigured&&<p role="status">El enlace seguro de activación está configurado en la función. Antes de invitar al equipo, verificá también la lista de redirecciones y el proveedor de correo en Supabase Auth; esta comprobación no confirma la entrega de emails.</p>}
      <button className="primary-button" disabled={busy||!email.trim()||!invitationsConfigured} type="submit">{busy?"Procesando...":invitationsConfigured?"Enviar invitación":"Invitaciones pendientes de configuración"}</button>
     </form>
    </section>
