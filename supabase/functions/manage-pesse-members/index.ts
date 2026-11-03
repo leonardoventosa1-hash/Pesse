@@ -1,6 +1,6 @@
 // Pesse editorial member management. Deploy only after review and Auth redirect validation.
 // Service role is available ONLY inside the Supabase Edge runtime. Never expose it to clients.
-import { createClient } from "npm:@supabase/supabase-js@2.57.0";
+import { createClient, type User } from "npm:@supabase/supabase-js@2.57.0";
 
 const headers = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"GET, POST, OPTIONS","Content-Type":"application/json"};
 const json=(status:number,data:unknown)=>new Response(JSON.stringify(data),{status,headers});
@@ -8,6 +8,14 @@ type MemberRole="admin"|"redactor";
 type RequestBody={action?:string;email?:string;role?:string;userId?:string};
 const isRole=(value:unknown):value is MemberRole=>value==="admin"||value==="redactor";
 const validEmail=(value:string)=>value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+const inviteRedirect=Deno.env.get("PESSE_INVITE_REDIRECT_URL")??"";
+const validInviteRedirect=()=>{
+ try{
+  const parsed=new URL(inviteRedirect);
+  return parsed.origin==="https://pesse-gilt.vercel.app"&&
+   parsed.pathname==="/admin/activar"&&!parsed.search&&!parsed.hash;
+ }catch{return false}
+};
 Deno.serve(async(request:Request)=>{
  if(request.method==="OPTIONS")return new Response(null,{status:204,headers});
  if(!["GET","POST"].includes(request.method))return json(405,{error:"Método no permitido"});
@@ -28,10 +36,22 @@ Deno.serve(async(request:Request)=>{
   if(request.method==="GET"){
    const {data:roles,error:rolesError}=await admin.from("editor_roles").select("user_id,role");
    if(rolesError)return json(503,{error:"No se pudieron consultar los roles"});
-   const {data:usersData,error:usersError}=await admin.auth.admin.listUsers({page:1,perPage:100});
-   if(usersError)return json(503,{error:"No se pudieron consultar los usuarios"});
+   // Auth paginates users independently of editor_roles. Retrieve several pages
+   // to avoid silently omitting editorial members after the first 100 accounts.
+   // Stop at 1,000 and report a visible warning if there may be more.
+   const pageSize=100;
+   const maxPages=10;
+   const allUsers: User[]=[];
+   let truncated=false;
+   for(let page=1;page<=maxPages;page++){
+    const {data:usersData,error:usersError}=await admin.auth.admin.listUsers({page,perPage:pageSize});
+    if(usersError)return json(503,{error:"No se pudieron consultar todos los usuarios"});
+    allUsers.push(...(usersData.users??[]));
+    if((usersData.users??[]).length<pageSize)break;
+    if(page===maxPages)truncated=true;
+   }
    const roleMap=new Map((roles??[]).map(r=>[r.user_id,r.role]));
-   const users=(usersData.users??[]).filter(u=>roleMap.has(u.id)||isRole(u.app_metadata?.pesse_suspended_role)).map(u=>{
+   const users=allUsers.filter(u=>roleMap.has(u.id)||isRole(u.app_metadata?.pesse_suspended_role)).map(u=>{
     const activeRole=roleMap.get(u.id);
     const suspendedRole=u.app_metadata?.pesse_suspended_role;
     const disabled=!activeRole&&isRole(suspendedRole);
@@ -39,15 +59,15 @@ Deno.serve(async(request:Request)=>{
      invitedAt:u.invited_at??null,confirmedAt:u.email_confirmed_at??null,
      lastSignInAt:u.last_sign_in_at??null,disabled};
    });
-   return json(200,{users,truncated:(usersData.users?.length??0)>=100,invitationsConfigured:Boolean(Deno.env.get("PESSE_INVITE_REDIRECT_URL")?.startsWith("https://"))});
+   return json(200,{users,truncated,invitationsConfigured:validInviteRedirect()});
   }
   let input:RequestBody;
   try{input=await request.json()}catch{return json(400,{error:"Solicitud inválida"})}
   if(input.action==="invite"){
    const email=(input.email??"").trim().toLowerCase();
    if(!validEmail(email)||!isRole(input.role))return json(400,{error:"Ingresá un correo válido y un rol"});
-   const redirectTo=Deno.env.get("PESSE_INVITE_REDIRECT_URL");
-   if(!redirectTo||!redirectTo.startsWith("https://"))return json(503,{error:"Falta configurar la dirección segura de activación"});
+   const redirectTo=inviteRedirect;
+   if(!validInviteRedirect())return json(503,{error:"La URL de activación debe coincidir con la ruta segura publicada de Pesse"});
    const {data:invite,error:inviteError}=await admin.auth.admin.inviteUserByEmail(email,{redirectTo});
    if(inviteError||!invite.user)return json(400,{error:inviteError?.message??"No se pudo crear la invitación"});
    const {error:assignError}=await admin.from("editor_roles").upsert({user_id:invite.user.id,role:input.role},{onConflict:"user_id"});
