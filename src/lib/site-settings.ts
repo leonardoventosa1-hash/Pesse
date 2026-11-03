@@ -4,6 +4,7 @@ export type SiteSettings = {
  site_name:string; tagline:string; description:string;
  hero_title:string; hero_emphasis:string; hero_description:string;
  instagram_url:string; facebook_url:string; youtube_url:string; tiktok_url:string;
+ logo_path:string;
 };
 export const defaultSiteSettings:SiteSettings={
  site_name:"Pesse",
@@ -15,7 +16,8 @@ export const defaultSiteSettings:SiteSettings={
  instagram_url:"https://www.instagram.com/pesse.info/",
  facebook_url:"https://www.facebook.com/share/1Bu3f2ArLs/",
  youtube_url:"https://www.youtube.com/@pesseinfo",
- tiktok_url:"https://www.tiktok.com/@pesse.info"
+ tiktok_url:"https://www.tiktok.com/@pesse.info",
+ logo_path:""
 };
 export const siteSettingsFields=Object.keys(defaultSiteSettings) as (keyof SiteSettings)[];
 export const socialHosts:{field:keyof SiteSettings;label:string;host:string}[]=[
