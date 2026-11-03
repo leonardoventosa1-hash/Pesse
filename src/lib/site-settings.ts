@@ -45,7 +45,13 @@ export async function getSiteSettings():Promise<SiteSettings>{
   const values=data as unknown as Partial<SiteSettings>;
   const merged={...defaultSiteSettings};
   for(const field of siteSettingsFields){
-   const value=values[field];if(typeof value==="string")merged[field]=value;
+   const value=values[field];
+   if(typeof value!=="string")continue;
+   if(field==="brand_variant"){
+    merged.brand_variant=value==="deep_green"||value==="light_green"?value:"original";
+   }else{
+    (merged as unknown as Record<string,string>)[field]=value;
+   }
   }
   return merged;
  }catch{return defaultSiteSettings}
