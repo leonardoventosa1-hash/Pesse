@@ -31,11 +31,14 @@ Deno.serve(async(request:Request)=>{
    const {data:usersData,error:usersError}=await admin.auth.admin.listUsers({page:1,perPage:100});
    if(usersError)return json(503,{error:"No se pudieron consultar los usuarios"});
    const roleMap=new Map((roles??[]).map(r=>[r.user_id,r.role]));
-   const users=(usersData.users??[]).filter(u=>roleMap.has(u.id)).map(u=>({
-    id:u.id,email:u.email??"",role:roleMap.get(u.id),invitedAt:u.invited_at??null,
-    confirmedAt:u.email_confirmed_at??null,lastSignInAt:u.last_sign_in_at??null,
-    disabled:!!(u.banned_until&&new Date(u.banned_until).getTime()>Date.now())
-   }));
+   const users=(usersData.users??[]).filter(u=>roleMap.has(u.id)||isRole(u.app_metadata?.pesse_suspended_role)).map(u=>{
+    const activeRole=roleMap.get(u.id);
+    const suspendedRole=u.app_metadata?.pesse_suspended_role;
+    const disabled=!activeRole&&isRole(suspendedRole);
+    return {id:u.id,email:u.email??"",role:activeRole??suspendedRole,
+     invitedAt:u.invited_at??null,confirmedAt:u.email_confirmed_at??null,
+     lastSignInAt:u.last_sign_in_at??null,disabled};
+   });
    return json(200,{users,truncated:(usersData.users?.length??0)>=100});
   }
   let input:RequestBody;
@@ -62,12 +65,32 @@ Deno.serve(async(request:Request)=>{
   }
   if(input.action==="disable"||input.action==="enable"){
    if(typeof input.userId!=="string")return json(400,{error:"Integrante inválido"});
-   if(input.userId===user.id)return json(400,{error:"No podés desactivar tu propia cuenta"});
+   if(input.userId===user.id)return json(400,{error:"No podés suspender tu propia cuenta"});
+   const {data:person,error:personError}=await admin.auth.admin.getUserById(input.userId);
+   if(personError||!person.user)return json(404,{error:"Cuenta no encontrada"});
    const {data:existing,error:existingError}=await admin.from("editor_roles").select("role").eq("user_id",input.userId).maybeSingle();
-   if(existingError||!existing)return json(404,{error:"Integrante no encontrado"});
-   const {error:updateError}=await admin.auth.admin.updateUserById(input.userId,{ban_duration:input.action==="disable"?"876000h":"none"});
-   if(updateError)return json(503,{error:"No se pudo actualizar el acceso"});
-   return json(200,{message:input.action==="disable"?"Acceso suspendido":"Acceso restablecido"});
+   if(existingError)return json(503,{error:"No se pudo consultar el rol"});
+   if(input.action==="disable"){
+    if(!existing||!isRole(existing.role))return json(400,{error:"El acceso editorial ya está suspendido"});
+    // Persist role server-side for restoration, then revoke database role immediately.
+    const meta={...person.user.app_metadata,pesse_suspended_role:existing.role};
+    const {error:metaError}=await admin.auth.admin.updateUserById(input.userId,{app_metadata:meta});
+    if(metaError)return json(503,{error:"No se pudo guardar el rol para una futura reactivación"});
+    const {error:removeError}=await admin.from("editor_roles").delete().eq("user_id",input.userId);
+    if(removeError)return json(503,{error:"No se pudo revocar el acceso editorial. Revisá la cuenta antes de reintentar"});
+    // Revoking editor_roles immediately invalidates RLS authorization, even with an old JWT.
+    return json(200,{message:"Acceso editorial suspendido"});
+   }
+   const suspendedRole=person.user.app_metadata?.pesse_suspended_role;
+   if(!isRole(suspendedRole))return json(400,{error:"La cuenta no tiene un rol suspendido para recuperar"});
+   if(existing)return json(409,{error:"La cuenta ya tiene un rol activo. Revisá el estado antes de continuar"});
+   const {error:restoreError}=await admin.from("editor_roles").upsert({user_id:input.userId,role:suspendedRole},{onConflict:"user_id"});
+   if(restoreError)return json(503,{error:"No se pudo restaurar el rol"});
+   const meta={...person.user.app_metadata};
+   delete meta.pesse_suspended_role;
+   const {error:metadataError}=await admin.auth.admin.updateUserById(input.userId,{app_metadata:meta,ban_duration:"none"});
+   if(metadataError)return json(503,{error:"Se restauró el rol, pero hay que revisar el estado de autenticación"});
+   return json(200,{message:"Acceso editorial restablecido"});
   }
   return json(400,{error:"Operación desconocida"});
  }catch{return json(500,{error:"No pudimos procesar la solicitud"})}
