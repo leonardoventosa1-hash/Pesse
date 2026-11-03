@@ -9,6 +9,7 @@ Esta función agrega el acceso **Gestionar integrantes** al panel editorial, vis
 - El `SUPABASE_SERVICE_ROLE_KEY` debe existir únicamente en el entorno privado de la Edge Function; nunca agregarlo a Vercel, GitHub ni `NEXT_PUBLIC_*`.
 - Los usuarios son invitados con `auth.admin.inviteUserByEmail`, después se asigna su rol en `editor_roles`. Si falla la asignación, se informa para revisión manual.
 - No se puede suspender ni quitar el rol de administrador a la propia cuenta; no se eliminan cuentas ni noticias.
+- Suspender retira el registro de `editor_roles` y guarda el rol anterior en `auth.app_metadata` desde el servidor. Esto corta los permisos de RLS incluso si queda un token JWT anterior. Reactivar restaura ese registro. La persona aún podría autenticarse en Supabase, pero no acceder al panel editorial mientras el rol esté retirado.
 - La vista de usuarios está limitada a los primeros 100 de Auth. Para equipos mayores es obligatorio implementar paginación antes de usarla.
 
 ## Pasos necesarios para habilitar invitaciones reales
