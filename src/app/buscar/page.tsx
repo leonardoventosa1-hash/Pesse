@@ -3,21 +3,39 @@ import Link from "next/link";
 import type {Metadata} from "next";
 import {supabase} from "@/lib/supabase";
 
-export const metadata:Metadata={title:"Buscar noticias | Pesse",description:"Buscá noticias y coberturas de Pesse por título y contenido."};
+export async function generateMetadata({searchParams}:{searchParams:Promise<{q?:string;page?:string}>}):Promise<Metadata>{
+ const {q,page}=await searchParams;
+ const hasQuery=typeof q==="string"&&q.trim().length>0;
+ const hasPage=typeof page==="string"&&page!=="1"&&page!=="";
+ return {title:"Buscar noticias | Pesse",description:"Buscá noticias y coberturas de Pesse por título y contenido.",robots:hasQuery||hasPage?{index:false,follow:true}:undefined,alternates:{canonical:"/buscar"}};
+}
 
 type SearchHit={id:string;slug:string;title:string;excerpt:string|null;cover_url:string|null;published_at:string|null};
 export default async function Buscar({searchParams}:{searchParams:Promise<{q?:string;page?:string}>}){
  const {q="",page="1"}=await searchParams;
  const query=typeof q==="string"?q.trim().slice(0,120):"";
- const requestedPage=Number(page);
+ const requestedPage=typeof page==="string"&&/^\d{1,5}$/.test(page)?Number(page):1;
  const perPage=12;
  const currentPage=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,10000):1;
  const db=supabase();
- const response=query.length>=2&&db?await db.rpc("search_pesse_articles",{search_term:query,page_number:currentPage,page_size:perPage}):null;
- const failed=query.length>=2&&(!db||Boolean(response?.error));
- const result=response?.data as {items?:SearchHit[];total?:number}|null;
+ let result:{items?:SearchHit[];total?:number}|null=null;
+ let failed=false;
+ if(query.length>=2){
+  if(!db){failed=true}else{
+   try{
+    const response=await db.rpc("search_pesse_articles",{search_term:query,page_number:currentPage,page_size:perPage});
+    failed=Boolean(response.error);
+    if(!failed){
+     const data=response.data as {items?:unknown;total?:unknown}|null;
+     if(!data||!Array.isArray(data.items)||typeof data.total!=="number"||!Number.isSafeInteger(data.total)||data.total<0){failed=true}
+     else result=data as {items:SearchHit[];total:number};
+    }
+   }catch{failed=true}
+  }
+ }
  const articles=result?.items??[];
- const total=Number(result?.total??0);
+ const reportedTotal=Number(result?.total??0);
+ const total=Number.isSafeInteger(reportedTotal)&&reportedTotal>=0?reportedTotal:0;
  const totalPages=Math.max(1,Math.ceil(total/perPage));
  const outOfRange=total>0&&currentPage>totalPages;
  const pageUrl=(n:number)=>"/buscar?q="+encodeURIComponent(query)+"&page="+n;
@@ -33,9 +51,9 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
   </form>
   {query.length===0?<p className="muted">Ingresá al menos dos caracteres para empezar.</p>:
    query.length<2?<p role="status" className="muted">Escribí al menos dos caracteres.</p>:
-   <><p role="status" className="news-list-intro">{total} {total===1?"resultado":"resultados"} para <strong>“{query}”</strong></p>
-    {failed?<p role="alert" className="muted">No pudimos completar la búsqueda en este momento. Intentá nuevamente.</p>:outOfRange?<p className="muted">Esta página no existe. <Link href={pageUrl(1)}>Volver a la primera página de resultados</Link>.</p>:articles.length===0?<p className="muted">No encontramos noticias que coincidan. Probá con otra palabra.</p>:
-     <div className="news-grid">{articles.map(a=><Link className="news-card" href={`/noticias/${a.slug}`} key={a.id}>
+   <>{!failed&&<p role="status" className="news-list-intro">{total} {total===1?"resultado":"resultados"} para <strong>“{query}”</strong></p>}
+    {failed?<div role="alert" className="muted"><p>No pudimos completar la búsqueda en este momento. Tus términos de búsqueda se conservaron.</p><Link className="secondary-button" href={pageUrl(currentPage)}>Reintentar búsqueda</Link></div>:outOfRange?<p className="muted">Esta página no existe. <Link href={pageUrl(1)}>Volver a la primera página de resultados</Link>.</p>:articles.length===0?<p className="muted">No encontramos noticias que coincidan. Probá con otra palabra.</p>:
+     <div className="news-grid">{articles.map(a=><Link className="news-card" href={`/noticias/${encodeURIComponent(a.slug)}`} key={a.id}>
       {a.cover_url&&<img src={a.cover_url} alt=""/>}
       <div className="news-card-content"><span className="eyebrow">ACTUALIDAD</span><h2>{a.title}</h2><p>{a.excerpt}</p></div>
      </Link>)}</div>}
