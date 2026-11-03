@@ -10,7 +10,7 @@ Esta función agrega el acceso **Gestionar integrantes** al panel editorial, vis
 - Los usuarios son invitados con `auth.admin.inviteUserByEmail`, después se asigna su rol en `editor_roles`. Si falla la asignación, se informa para revisión manual.
 - No se puede suspender ni quitar el rol de administrador a la propia cuenta; no se eliminan cuentas ni noticias.
 - Suspender retira el registro de `editor_roles` y guarda el rol anterior en `auth.app_metadata` desde el servidor. Esto corta los permisos de RLS incluso si queda un token JWT anterior. Reactivar restaura ese registro. La persona aún podría autenticarse en Supabase, pero no acceder al panel editorial mientras el rol esté retirado.
-- La vista de usuarios está limitada a los primeros 100 de Auth. Para equipos mayores es obligatorio implementar paginación antes de usarla.
+- La vista de integrantes consulta Auth en páginas de 100, hasta 1.000 cuentas. Si alcanza el límite, muestra una advertencia de lista incompleta. Para instalaciones mayores es necesario implementar paginación completa o filtros de búsqueda en el servidor.
 
 ## Pasos necesarios para habilitar invitaciones reales
 
@@ -45,3 +45,10 @@ Las APIs conectadas permiten desplegar Edge Functions y revisar roles, pero **no
 5. Probar invitación a una cuenta controlada, establecimiento de contraseña de 12 caracteres o más, login y lectura de rol. Validar rechazo como Redactor al administrar integrantes y suspensión de acceso.
 
 El código trata ahora enlaces expirados o inválidos mostrando un aviso de nueva invitación, y actualiza el estado de Auth sin encadenar consultas asíncronas dentro de `onAuthStateChange`.
+
+## Endurecimiento operativo — 3 de noviembre de 2026
+
+- La gestión de integrantes consulta hasta diez páginas de Supabase Auth y evita omitir silenciosamente integrantes al superar 100 usuarios.
+- La función sólo considera habilitadas las invitaciones cuando `PESSE_INVITE_REDIRECT_URL` es exactamente `https://pesse-gilt.vercel.app/admin/activar` (HTTPS, sin parámetros). Cambiar de dominio requiere actualizar explícitamente esta validación y las URLs permitidas de Supabase Auth.
+- Esta validación **no comprueba** por sí misma que Supabase Auth tenga allowlisted la URL ni que el servicio SMTP pueda entregar correos. Siguen siendo necesarias pruebas de invitación reales con un buzón controlado.
+- No enviar correos al equipo antes de validar contraseña y acceso como Administrador y Redactor.
