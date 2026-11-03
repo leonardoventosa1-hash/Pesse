@@ -272,3 +272,33 @@ body[data-brand-variant="light_green"] .eyebrow{color:#236b4a}
 body[data-brand-variant="light_green"] .hero .eyebrow,
 body[data-brand-variant="light_green"] .hero h1 em{color:#a6e6c0}
 body[data-brand-variant="light_green"] .category-number{color:#236b4a}
+
+
+/* Visitor reading controls and discoverable archives */
+.reader-section .reader-size-0 .article-body{font-size:16px;line-height:1.82}
+.reader-section .reader-size-1 .article-body{font-size:19px;line-height:1.82}
+.reader-section .reader-size-2 .article-body{font-size:22px;line-height:1.82}
+.reader-section .reader-size-0 .article-body :is(p,li),
+.reader-section .reader-size-1 .article-body :is(p,li),
+.reader-section .reader-size-2 .article-body :is(p,li){font-size:inherit;line-height:inherit}
+.reader-controls{background:#eef3ef;border:1px solid #d6e3d9;border-radius:10px;padding:12px 15px;margin-bottom:9px}
+.reader-controls>span:first-child{margin-right:auto}
+.reader-progress-label{font-size:12px!important;min-width:68px;text-align:right;margin-right:0!important}
+.reader-progress-track{width:100%;height:5px;background:#dce7df;border-radius:999px;overflow:hidden;margin:0 0 25px}
+.reader-progress-fill{height:100%;background:#1d503e;transition:width .1s linear}
+.reader-back-top{display:inline-block;margin-top:22px;padding:10px 0;color:#1d503e;font-size:13px;font-weight:800;text-decoration:underline;text-underline-offset:4px}
+.archive-feedback{padding:28px;background:#fff;border:1px solid #dce4de;border-radius:10px}
+.archive-pagination{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:42px;flex-wrap:wrap}
+.archive-pagination>span{font-size:14px;font-weight:700;color:#41564a}
+.archive-card-placeholder{aspect-ratio:16/9;background:#e5eee8;display:grid;place-items:center;color:#1d503e;font-size:58px;font-weight:900}
+.news-archive .news-card{border-radius:9px}
+.news-archive .news-card h2{font-size:clamp(19px,2vw,24px)}
+@media(max-width:650px){
+ .reader-controls{gap:7px;padding:10px}
+ .reader-controls>span:first-child{width:100%;margin-bottom:3px}
+ .reader-progress-label{margin-left:auto}
+ .archive-pagination{justify-content:center}
+ .archive-pagination>span{order:-1;width:100%;text-align:center}
+ .news-archive .news-grid{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.reader-progress-fill{transition:none}}

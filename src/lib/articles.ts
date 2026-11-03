@@ -24,3 +24,21 @@ export async function homepageArticles(limit=6):Promise<Article[]>{
  const selected=data[0] as Article;
  return [selected,...latest.filter(item=>item.id!==selected.id)].slice(0,limit);
 }
+
+
+export type ArticleArchivePage={items:Article[];total:number;error:boolean};
+export async function paginatedPublicArticles(page:number,pageSize=12):Promise<ArticleArchivePage>{
+ const db=supabase();
+ if(!db)return {items:[],total:0,error:true};
+ const safePage=Math.max(1,Math.min(1000,Math.floor(page)));
+ const from=(safePage-1)*pageSize;
+ try{
+  const {data,error,count}=await db.from("articles")
+   .select("id,slug,title,excerpt,cover_url,category_id,status,published_at,created_at",{count:"exact"})
+   .eq("status","published").is("deleted_at",null).lte("published_at",new Date().toISOString())
+   .order("published_at",{ascending:false}).order("id",{ascending:false})
+   .range(from,from+pageSize-1);
+  if(error)return {items:[],total:0,error:true};
+  return {items:(data??[]) as Article[],total:count??0,error:false};
+ }catch{return {items:[],total:0,error:true}}
+}
