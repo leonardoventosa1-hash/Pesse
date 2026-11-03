@@ -32,7 +32,7 @@ export default function GeneralSettings(){
    if(!user){router.replace("/admin/login");return}
    const role=await getRole();if(!active)return;
    if(role!=="admin"){router.replace("/admin");return}
-   const {data,error:readError}=await db.from("site_settings").select("site_name,tagline,description,hero_title,hero_emphasis,hero_description,instagram_url,facebook_url,youtube_url,tiktok_url,logo_path").eq("id",1).single();
+   const {data,error:readError}=await db.from("site_settings").select("site_name,tagline,description,hero_title,hero_emphasis,hero_description,instagram_url,facebook_url,youtube_url,tiktok_url,logo_path,brand_variant").eq("id",1).single();
    if(readError)throw Error("Falta instalar la migración de configuración general en Supabase: "+readError.message);
    if(!active)return;
    const parsed=data as SiteSettings;setSettings(parsed);setOriginal(parsed);
@@ -63,6 +63,7 @@ export default function GeneralSettings(){
    if(v.length>(item.max)||((item.key==="site_name"||item.key==="hero_title"||item.key==="hero_emphasis")&&v.length<2)||((item.key==="description"||item.key==="hero_description")&&v.length<10)){setError("Revisá el campo «"+item.label+"».");return}
   }
   for(const item of socialHosts)if(!validSocialUrl(settings[item.field],item.host)){setError("La URL de "+item.label+" debe ser HTTPS y corresponder a "+item.host+".");return}
+  if(!["original","deep_green","light_green"].includes(settings.brand_variant)){setError("Seleccioná una paleta de Pesse válida.");return}
   const next=Object.fromEntries(siteSettingsFields.map(k=>[k,settings[k].trim()])) as SiteSettings;
   setSaving(true);
   try{
@@ -104,6 +105,20 @@ export default function GeneralSettings(){
     </label>)}
    </section>
    <section className="admin-shell" style={{marginBottom:24}}>
+    <h2>Paleta institucional</h2>
+    <p className="muted">Se mantienen los tonos verdes de Pesse. La selección original conserva exactamente los colores actuales del sitio.</p>
+    <label>Variante visual
+     <select value={settings.brand_variant} onChange={e=>update("brand_variant",e.target.value)}>
+      <option value="original">Original de Pesse</option>
+      <option value="deep_green">Verde bosque</option>
+      <option value="light_green">Verde esmeralda</option>
+     </select>
+    </label>
+    <div style={{display:"flex",gap:8,alignItems:"center",marginTop:12}}>
+     {(["original","deep_green","light_green"] as const).map((variant,i)=><div key={variant} title={variant} style={{width:66,height:38,borderRadius:7,border:variant===settings.brand_variant?"3px solid #111":"1px solid #ccd2cc",background:["#1d503e","#153d30","#23724d"][i]}}/>)}
+    </div>
+   </section>
+   <section className="admin-shell" style={{marginBottom:24}}>
     <h2>Redes sociales oficiales</h2>
     <p className="muted">Solo se aceptan enlaces HTTPS de la plataforma correspondiente. Pesse no incluye X.</p>
     {socialHosts.map(item=><label key={item.field}>{item.label}<input type="url" required maxLength={500} value={settings[item.field]} onChange={e=>update(item.field,e.target.value)}/></label>)}
@@ -112,7 +127,8 @@ export default function GeneralSettings(){
     <h2>Otras herramientas</h2>
     <p><Link href="/admin/integrantes">Gestionar integrantes y permisos ↗</Link></p><p><Link href="/admin/configuracion/secciones">Administrar secciones y orden del menú ↗</Link></p>
     <p><Link href="/admin/configuracion/publicidad">Gestionar espacios publicitarios ↗</Link></p>
-    <p className="muted">Los colores y la organización avanzada de la portada requieren módulos independientes y pruebas visuales. Los banners se gestionan desde Publicidad. No se ofrecen controles que todavía no funcionen.</p>
+    <p><Link href="/admin/configuracion/portada">Organizar bloques de portada ↗</Link></p>
+    <p className="muted">La paleta ofrece tres variantes verdes verificables; el diseño avanzado de la portada sigue siendo parte de futuras mejoras. Los banners se gestionan desde Publicidad. No se ofrecen controles que todavía no funcionen.</p>
    </section>
    <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:12}}>
     <button className="primary-button" type="submit" disabled={saving||uploading||!changed}>{saving?"Guardando...":"Guardar configuración"}</button>
