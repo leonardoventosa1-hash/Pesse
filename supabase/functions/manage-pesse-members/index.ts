@@ -39,7 +39,7 @@ Deno.serve(async(request:Request)=>{
      invitedAt:u.invited_at??null,confirmedAt:u.email_confirmed_at??null,
      lastSignInAt:u.last_sign_in_at??null,disabled};
    });
-   return json(200,{users,truncated:(usersData.users?.length??0)>=100});
+   return json(200,{users,truncated:(usersData.users?.length??0)>=100,invitationsConfigured:Boolean(Deno.env.get("PESSE_INVITE_REDIRECT_URL")?.startsWith("https://"))});
   }
   let input:RequestBody;
   try{input=await request.json()}catch{return json(400,{error:"Solicitud inválida"})}
