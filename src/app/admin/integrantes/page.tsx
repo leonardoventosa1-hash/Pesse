@@ -27,7 +27,17 @@ export default function Members(){
    method,headers:{"Authorization":"Bearer "+session.access_token},
    ...(body?{body}:{}),
   });
-  if(result.error)throw Error(result.data?.error??result.error.message);
+  if(result.error){
+   let message=result.error.message;
+   const response=(result.error as {context?:Response}).context;
+   if(response&&typeof response.json==="function"){
+    try{
+     const details:unknown=await response.json();
+     if(details&&typeof details==="object"&&"error" in details&&typeof details.error==="string")message=details.error;
+    }catch{/* Conservar el mensaje original si la respuesta no es JSON */}
+   }
+   throw Error(message);
+  }
   return result.data as ApiResponse;
  }
  async function refresh(){
