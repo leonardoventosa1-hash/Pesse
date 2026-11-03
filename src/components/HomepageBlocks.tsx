@@ -1,5 +1,6 @@
 import Link from "next/link";
 import CategoryNewsSections from "@/components/CategoryNewsSections";
+import VideoShowcase from "@/components/VideoShowcase";
 import type {Article} from "@/lib/supabase";
 import type {NavigationCategory} from "@/lib/categories";
 import type {HomepageSection} from "@/lib/homepage-sections";
@@ -22,7 +23,7 @@ export default function HomepageBlocks({articles,categories,sections}:{
   if(s.section_key==="category_directory")
    return <section key={s.section_key} className="category-section"><div className="section-heading"><div><div className="eyebrow">ELEGÍ TU TEMA</div><h2>Explorá las secciones</h2></div></div><div className="category-grid">{categories.map((cat,i)=><Link href={`/categoria/${cat.slug}`} className="category-card" key={cat.slug}><span className="category-number">{String(i+1).padStart(2,"0")}</span><h3>{cat.name}</h3><p>{cat.description||defaultDescriptions[cat.slug]||"Noticias y novedades de esta sección."}</p><span className="category-arrow">↗</span></Link>)}</div></section>;
   if(s.section_key==="video_promo")
-   return <section key={s.section_key} className="newsletter-banner"><div><div className="eyebrow">PESSE EN TODAS PARTES</div><h2>Más historias. Más formatos.</h2><p>Noticias, entrevistas y coberturas audiovisuales en nuestras plataformas.</p></div><Link className="light-button" href="/videos">Conocé nuestros videos ↗</Link></section>;
+   return <VideoShowcase key={s.section_key}/>;
   return null;
  })}</>;
 }
