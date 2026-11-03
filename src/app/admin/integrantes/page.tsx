@@ -7,7 +7,7 @@ import {getRole} from "@/lib/roles";
 
 type Role="admin"|"redactor";
 type Member={id:string;email:string;role:Role;confirmedAt:string|null;invitedAt:string|null;lastSignInAt:string|null;disabled:boolean};
-type ApiResponse={users?:Member[];message?:string;error?:string;truncated?:boolean};
+type ApiResponse={users?:Member[];message?:string;error?:string;truncated?:boolean;invitationsConfigured?:boolean};
 
 export default function Members(){
  const router=useRouter();
@@ -19,6 +19,7 @@ export default function Members(){
  const [loading,setLoading]=useState(true);
  const [notice,setNotice]=useState("");
  const [truncated,setTruncated]=useState(false);
+ const [invitationsConfigured,setInvitationsConfigured]=useState(false);
  async function api(method:"GET"|"POST",body?:object):Promise<ApiResponse>{
   const db=supabase();if(!db)throw Error("Supabase no está configurado");
   const {data:{session},error:sessionError}=await db.auth.getSession();
@@ -46,6 +47,7 @@ export default function Members(){
    const result=await api("GET");
    setMembers(result.users??[]);
    setTruncated(Boolean(result.truncated));
+   setInvitationsConfigured(Boolean(result.invitationsConfigured));
    setNotice("");
   }catch(error){setNotice(error instanceof Error?error.message:"No se pudo cargar el equipo")}
   finally{setLoading(false)}
@@ -95,7 +97,8 @@ export default function Members(){
      <label>Correo electrónico<input type="email" required maxLength={254} autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="integrante@ejemplo.com"/></label>
      <label>Permisos<select value={role} onChange={e=>setRole(e.target.value as Role)}><option value="redactor">Redactor</option><option value="admin">Administrador</option></select></label>
      <p className="muted">La persona recibirá un correo para activar su cuenta. Los redactores no podrán gestionar integrantes.</p>
-     <button className="primary-button" disabled={busy||!email.trim()} type="submit">{busy?"Procesando...":"Enviar invitación"}</button>
+     {!invitationsConfigured&&<p role="status">Las invitaciones están temporalmente deshabilitadas. Falta configurar la dirección de activación en Supabase y autorizar su URL de retorno.</p>}
+     <button className="primary-button" disabled={busy||!email.trim()||!invitationsConfigured} type="submit">{busy?"Procesando...":invitationsConfigured?"Enviar invitación":"Invitaciones pendientes de configuración"}</button>
     </form>
    </section>
    <section aria-labelledby="team-heading"><div className="section-heading"><h2 id="team-heading">Equipo editorial</h2><button type="button" className="secondary-button" onClick={()=>void refresh()} disabled={loading||busy}>Actualizar</button></div>
