@@ -102,7 +102,7 @@ export default function Members(){
     </form>
    </section>
    <section aria-labelledby="team-heading"><div className="section-heading"><h2 id="team-heading">Equipo editorial</h2><button type="button" className="secondary-button" onClick={()=>void refresh()} disabled={loading||busy}>Actualizar</button></div>
-    {truncated&&<p role="alert">Se alcanzó el límite de 100 usuarios. Para administrar equipos más grandes es necesario ampliar la paginación.</p>}
+    {truncated&&<p role="alert">Se alcanzó el límite de consulta de 1.000 usuarios de Supabase. Puede haber integrantes fuera de la lista; no realices cambios masivos sin revisar Auth.</p>}
     {loading?<p role="status">Cargando integrantes...</p>:members.length===0?<p>Todavía no hay integrantes disponibles o no se pudo recuperar la lista.</p>:<div className="editor-list">{members.map(member=><div key={member.id} className="editor-row" style={{flexWrap:"wrap",gap:16}}>
      <div><strong>{member.email}</strong><p className="muted">{member.role==="admin"?"Administrador":"Redactor"} · {member.disabled?"Acceso suspendido":member.confirmedAt?"Cuenta confirmada":"Invitación pendiente"}</p></div>
      <div className="dashboard-article-actions" style={{display:"flex",gap:8,flexWrap:"wrap"}}>
