@@ -127,6 +127,7 @@ export default function GeneralSettings(){
     <h2>Otras herramientas</h2>
     <p><Link href="/admin/integrantes">Gestionar integrantes y permisos ↗</Link></p><p><Link href="/admin/configuracion/secciones">Administrar secciones y orden del menú ↗</Link></p>
     <p><Link href="/admin/configuracion/publicidad">Gestionar espacios publicitarios ↗</Link></p>
+    <p><Link href="/admin/configuracion/videos">Administrar videoteca y Pesse Stream ↗</Link></p>
     <p><Link href="/admin/configuracion/portada">Organizar bloques de portada ↗</Link></p>
     <p className="muted">La paleta ofrece tres variantes verdes verificables; el diseño avanzado de la portada sigue siendo parte de futuras mejoras. Los banners se gestionan desde Publicidad. No se ofrecen controles que todavía no funcionen.</p>
    </section>
