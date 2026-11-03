@@ -93,7 +93,7 @@ export default function Members(){
     {loading?<p role="status">Cargando integrantes...</p>:members.length===0?<p>Todavía no hay integrantes disponibles o no se pudo recuperar la lista.</p>:<div className="editor-list">{members.map(member=><div key={member.id} className="editor-row" style={{flexWrap:"wrap",gap:16}}>
      <div><strong>{member.email}</strong><p className="muted">{member.role==="admin"?"Administrador":"Redactor"} · {member.disabled?"Acceso suspendido":member.confirmedAt?"Cuenta confirmada":"Invitación pendiente"}</p></div>
      <div className="dashboard-article-actions" style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-      <button type="button" className="secondary-button" disabled={busy} onClick={()=>void modify(member,"change-role",member.role==="admin"?"redactor":"admin")}>{member.role==="admin"?"Cambiar a redactor":"Cambiar a administrador"}</button>
+      <button type="button" className="secondary-button" disabled={busy||member.disabled} title={member.disabled?"Primero restablecé el acceso para cambiar el rol":undefined} onClick={()=>void modify(member,"change-role",member.role==="admin"?"redactor":"admin")}>{member.role==="admin"?"Cambiar a redactor":"Cambiar a administrador"}</button>
       <button type="button" className="secondary-button" disabled={busy} onClick={()=>void modify(member,member.disabled?"enable":"disable")}>{member.disabled?"Restablecer acceso":"Suspender acceso"}</button>
      </div>
     </div>)}</div>}
