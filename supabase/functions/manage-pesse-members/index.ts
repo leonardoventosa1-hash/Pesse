@@ -28,10 +28,22 @@ Deno.serve(async(request:Request)=>{
   if(request.method==="GET"){
    const {data:roles,error:rolesError}=await admin.from("editor_roles").select("user_id,role");
    if(rolesError)return json(503,{error:"No se pudieron consultar los roles"});
-   const {data:usersData,error:usersError}=await admin.auth.admin.listUsers({page:1,perPage:100});
-   if(usersError)return json(503,{error:"No se pudieron consultar los usuarios"});
+   // Auth paginates users independently of editor_roles. Retrieve several pages
+   // to avoid silently omitting editorial members after the first 100 accounts.
+   // Stop at 1,000 and report a visible warning if there may be more.
+   const pageSize=100;
+   const maxPages=10;
+   const allUsers: Awaited<ReturnType<typeof admin.auth.admin.listUsers>>["data"]["users"]=[];
+   let truncated=false;
+   for(let page=1;page<=maxPages;page++){
+    const {data:usersData,error:usersError}=await admin.auth.admin.listUsers({page,perPage:pageSize});
+    if(usersError)return json(503,{error:"No se pudieron consultar todos los usuarios"});
+    allUsers.push(...(usersData.users??[]));
+    if((usersData.users??[]).length<pageSize)break;
+    if(page===maxPages)truncated=true;
+   }
    const roleMap=new Map((roles??[]).map(r=>[r.user_id,r.role]));
-   const users=(usersData.users??[]).filter(u=>roleMap.has(u.id)||isRole(u.app_metadata?.pesse_suspended_role)).map(u=>{
+   const users=allUsers.filter(u=>roleMap.has(u.id)||isRole(u.app_metadata?.pesse_suspended_role)).map(u=>{
     const activeRole=roleMap.get(u.id);
     const suspendedRole=u.app_metadata?.pesse_suspended_role;
     const disabled=!activeRole&&isRole(suspendedRole);
@@ -39,7 +51,7 @@ Deno.serve(async(request:Request)=>{
      invitedAt:u.invited_at??null,confirmedAt:u.email_confirmed_at??null,
      lastSignInAt:u.last_sign_in_at??null,disabled};
    });
-   return json(200,{users,truncated:(usersData.users?.length??0)>=100,invitationsConfigured:Boolean(Deno.env.get("PESSE_INVITE_REDIRECT_URL")?.startsWith("https://"))});
+   return json(200,{users,truncated,invitationsConfigured:Boolean(Deno.env.get("PESSE_INVITE_REDIRECT_URL")?.startsWith("https://"))});
   }
   let input:RequestBody;
   try{input=await request.json()}catch{return json(400,{error:"Solicitud inválida"})}
