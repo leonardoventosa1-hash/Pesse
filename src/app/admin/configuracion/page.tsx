@@ -80,8 +80,8 @@ export default function GeneralSettings(){
    </section>
    <section className="admin-shell" style={{marginBottom:24}}>
     <h2>Otras herramientas</h2>
-    <p><Link href="/admin/integrantes">Gestionar integrantes y permisos ↗</Link></p>
-    <p className="muted">Las secciones, publicidad, logo y organización visual de la portada se incorporarán en módulos independientes una vez que tengan sus permisos y migraciones propias. No se ofrecen controles que todavía no funcionen.</p>
+    <p><Link href="/admin/integrantes">Gestionar integrantes y permisos ↗</Link></p><p><Link href="/admin/configuracion/secciones">Administrar secciones y orden del menú ↗</Link></p>
+    <p className="muted">La publicidad, el logo y la organización visual de la portada se incorporarán en módulos independientes una vez que tengan sus permisos y migraciones propias. No se ofrecen controles que todavía no funcionen.</p>
    </section>
    <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:12}}>
     <button className="primary-button" type="submit" disabled={saving||!changed}>{saving?"Guardando...":"Guardar configuración"}</button>
