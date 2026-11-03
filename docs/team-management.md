@@ -62,3 +62,11 @@ En **Auth → URL Configuration**, Site URL debe ser `https://pesse-gilt.vercel.
 La comprobación en pantalla confirma **únicamente** la presencia de ese secreto con el destino exacto dentro de la Edge Function; no puede leer la allowlist de Supabase Auth, la plantilla de correo ni comprobar que el SMTP entrega invitaciones. **No** interpretar «configurado» como una prueba completa de entrega. La documentación de Supabase advierte que si `redirectTo` no está permitido, podría descartarlo sin error y derivar al Site URL, lo que impide una activación correcta.
 
 Antes de invitar integrantes reales, usar un buzón de prueba controlado y verificar que la invitación lleva a `/admin/activar`, permite establecer una contraseña de 12+ caracteres, inicia sesión como Redactor y deniega acceso a `/admin/integrantes`. Luego comprobar suspensión y reactivación de esa cuenta de prueba. Nunca enviar claves privadas de Supabase por correo ni en el navegador.
+
+## Validación de enlaces de invitación — 03/11/2026
+
+El formulario `/admin/activar` admite dos variantes de enlace de Supabase Auth: el callback estándar que el SDK procesa automáticamente (fragmento o código PKCE) y una plantilla personalizada con `?token_hash=...&type=invite` (verificación de OTP una sola vez). El hash se elimina de la URL tras verificarlo para que no quede en el historial. Los tokens o códigos no se almacenan en nuestros registros ni se envían a Pesse.
+
+Antes de mostrar el formulario de contraseña, se comprueba que exista una sesión Supabase **y** que la cuenta posea el rol vigente `admin` o `redactor` obtenido mediante RPC. Si falta el rol se presenta un error específico para contactar al administrador, sin desbloquear la activación. Enlaces vencidos o inválidos muestran un aviso controlado.
+
+Pruebas manuales pendientes: invitación normal con email de prueba, plantilla personalizada con token_hash (si se utiliza), enlace vencido, usuario autenticado sin rol, acceso después de guardar contraseña, y rechazo al intentar acceder a funciones administrativas con rol redactor. La comprobación automatizada de compilación no sustituye estas pruebas de correo.
