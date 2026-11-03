@@ -48,7 +48,7 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
   {query.length===0?<p className="muted">Ingresá al menos dos caracteres para empezar.</p>:
    query.length<2?<p role="status" className="muted">Escribí al menos dos caracteres.</p>:
    <>{!failed&&<p role="status" className="news-list-intro">{total} {total===1?"resultado":"resultados"} para <strong>“{query}”</strong></p>}
-    {failed?<p role="alert" className="muted">No pudimos completar la búsqueda en este momento. Intentá nuevamente.</p>:outOfRange?<p className="muted">Esta página no existe. <Link href={pageUrl(1)}>Volver a la primera página de resultados</Link>.</p>:articles.length===0?<p className="muted">No encontramos noticias que coincidan. Probá con otra palabra.</p>:
+    {failed?<div role="alert" className="muted"><p>No pudimos completar la búsqueda en este momento. Tus términos de búsqueda se conservaron.</p><Link className="secondary-button" href={pageUrl(currentPage)}>Reintentar búsqueda</Link></div>:outOfRange?<p className="muted">Esta página no existe. <Link href={pageUrl(1)}>Volver a la primera página de resultados</Link>.</p>:articles.length===0?<p className="muted">No encontramos noticias que coincidan. Probá con otra palabra.</p>:
      <div className="news-grid">{articles.map(a=><Link className="news-card" href={`/noticias/${encodeURIComponent(a.slug)}`} key={a.id}>
       {a.cover_url&&<img src={a.cover_url} alt=""/>}
       <div className="news-card-content"><span className="eyebrow">ACTUALIDAD</span><h2>{a.title}</h2><p>{a.excerpt}</p></div>
