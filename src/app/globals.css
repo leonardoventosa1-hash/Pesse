@@ -481,3 +481,12 @@ body[data-brand-variant="light_green"] .home-intro{background:#173d2e}
  .pesse-video-empty>div:last-child{padding:24px}
 }
 @media(prefers-reduced-motion:reduce){.pesse-video-card{transition:none}}
+
+
+.pesse-stream-promo{display:flex;justify-content:space-between;align-items:center;gap:28px;margin-top:20px;padding:22px 25px;border:1px solid #50735a;border-radius:8px;background:#1a3c29}
+.pesse-stream-promo-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;color:#a7dbb9}
+.pesse-stream-promo h3{margin:8px 0 6px;font-size:clamp(19px,2.4vw,26px);letter-spacing:-.03em;color:#fff}
+.pesse-stream-promo p{font-size:13px;line-height:1.5;color:#cfdfd3;max-width:560px;margin:0}
+.pesse-stream-promo-link{padding:12px 17px;border:1px solid #b2dabc;border-radius:5px;min-height:44px;display:inline-flex;align-items:center;gap:11px;font-size:12px;font-weight:900;color:#e1f5e6;white-space:nowrap}
+.pesse-stream-promo-link:hover{background:#d3edda;color:#153e2a}
+@media(max-width:720px){.pesse-stream-promo{flex-direction:column;align-items:flex-start;padding:20px}.pesse-stream-promo-link{white-space:normal}}
