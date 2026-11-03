@@ -33,3 +33,15 @@ Esta función agrega el acceso **Gestionar integrantes** al panel editorial, vis
 - **Invitaciones intencionalmente deshabilitadas** hasta configurar `PESSE_INVITE_REDIRECT_URL` con una URL HTTPS activada y permitida por Supabase Auth. La ausencia de esta variable devuelve un error controlado sin enviar correos.
 - La URL de producción actual contiene aún la versión anterior del portal. No usar el dominio público como destino de invitación hasta publicar `/admin/activar`.
 - Pendiente: verificar el correo con un usuario de prueba, RLS y permisos de Administrador/Redactor en sesiones reales, y la experiencia completa de cambio de contraseña.
+
+## Activación por correo: configuración pendiente en el panel de Supabase
+
+Las APIs conectadas permiten desplegar Edge Functions y revisar roles, pero **no exponen una operación para cambiar Auth → URL Configuration ni para crear secretos de funciones**. Por eso no se enviaron invitaciones reales.
+
+1. Publicar primero `/admin/activar` en el dominio que recibirán los integrantes. No usar una vista previa efímera para correos permanentes.
+2. En [Supabase Auth URL Configuration](https://supabase.com/dashboard/project/sabfvfeletrinwloyryw/auth/url-configuration), autorizar exactamente la URL HTTPS `https://pesse-gilt.vercel.app/admin/activar`, una vez que el portal público incluya esa ruta.
+3. En [Supabase Edge Functions](https://supabase.com/dashboard/project/sabfvfeletrinwloyryw/functions) configurar el secreto **`PESSE_INVITE_REDIRECT_URL`** con el mismo destino. No utilizar una clave `service_role` en ninguna variable `NEXT_PUBLIC_*`.
+4. Verificar el proveedor de correo de Supabase, remitente y cuota de invitaciones.
+5. Probar invitación a una cuenta controlada, establecimiento de contraseña de 12 caracteres o más, login y lectura de rol. Validar rechazo como Redactor al administrar integrantes y suspensión de acceso.
+
+El código trata ahora enlaces expirados o inválidos mostrando un aviso de nueva invitación, y actualiza el estado de Auth sin encadenar consultas asíncronas dentro de `onAuthStateChange`.
