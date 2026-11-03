@@ -18,9 +18,17 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
  const perPage=12;
  const currentPage=Number.isSafeInteger(requestedPage)&&requestedPage>0?Math.min(requestedPage,10000):1;
  const db=supabase();
- const response=query.length>=2&&db?await db.rpc("search_pesse_articles",{search_term:query,page_number:currentPage,page_size:perPage}):null;
- const failed=query.length>=2&&(!db||Boolean(response?.error));
- const result=response?.data as {items?:SearchHit[];total?:number}|null;
+ let result:{items?:SearchHit[];total?:number}|null=null;
+ let failed=false;
+ if(query.length>=2){
+  if(!db){failed=true}else{
+   try{
+    const response=await db.rpc("search_pesse_articles",{search_term:query,page_number:currentPage,page_size:perPage});
+    failed=Boolean(response.error);
+    if(!failed)result=response.data as {items?:SearchHit[];total?:number}|null;
+   }catch{failed=true}
+  }
+ }
  const articles=result?.items??[];
  const reportedTotal=Number(result?.total??0);
  const total=Number.isSafeInteger(reportedTotal)&&reportedTotal>=0?reportedTotal:0;
