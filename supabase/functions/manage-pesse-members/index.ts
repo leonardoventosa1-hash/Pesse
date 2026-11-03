@@ -46,7 +46,7 @@ Deno.serve(async(request:Request)=>{
   if(input.action==="invite"){
    const email=(input.email??"").trim().toLowerCase();
    if(!validEmail(email)||!isRole(input.role))return json(400,{error:"Ingresá un correo válido y un rol"});
-   const redirectTo=Deno.env.get("PESSE_INVITE_REDIRECT_URL")??"https://pesse-gilt.vercel.app/admin/activar";
+   const redirectTo=Deno.env.get("PESSE_INVITE_REDIRECT_URL");
    if(!redirectTo||!redirectTo.startsWith("https://"))return json(503,{error:"Falta configurar la dirección segura de activación"});
    const {data:invite,error:inviteError}=await admin.auth.admin.inviteUserByEmail(email,{redirectTo});
    if(inviteError||!invite.user)return json(400,{error:inviteError?.message??"No se pudo crear la invitación"});
