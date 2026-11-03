@@ -8,10 +8,10 @@ type MemberRole="admin"|"redactor";
 type RequestBody={action?:string;email?:string;role?:string;userId?:string};
 const isRole=(value:unknown):value is MemberRole=>value==="admin"||value==="redactor";
 const validEmail=(value:string)=>value.length<=254&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-const inviteRedirect=Deno.env.get("PESSE_INVITE_REDIRECT_URL")??"";
+const inviteRedirect=()=>Deno.env.get("PESSE_INVITE_REDIRECT_URL")??"";
 const validInviteRedirect=()=>{
  try{
-  const parsed=new URL(inviteRedirect);
+  const parsed=new URL(inviteRedirect());
   return parsed.origin==="https://pesse-gilt.vercel.app"&&
    parsed.pathname==="/admin/activar"&&!parsed.search&&!parsed.hash;
  }catch{return false}
@@ -66,7 +66,7 @@ Deno.serve(async(request:Request)=>{
   if(input.action==="invite"){
    const email=(input.email??"").trim().toLowerCase();
    if(!validEmail(email)||!isRole(input.role))return json(400,{error:"Ingresá un correo válido y un rol"});
-   const redirectTo=inviteRedirect;
+   const redirectTo=inviteRedirect();
    if(!validInviteRedirect())return json(503,{error:"La URL de activación debe coincidir con la ruta segura publicada de Pesse"});
    const {data:invite,error:inviteError}=await admin.auth.admin.inviteUserByEmail(email,{redirectTo});
    if(inviteError||!invite.user)return json(400,{error:inviteError?.message??"No se pudo crear la invitación"});

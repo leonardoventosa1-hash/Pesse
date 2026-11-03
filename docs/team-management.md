@@ -52,3 +52,13 @@ El código trata ahora enlaces expirados o inválidos mostrando un aviso de nuev
 - La función sólo considera habilitadas las invitaciones cuando `PESSE_INVITE_REDIRECT_URL` es exactamente `https://pesse-gilt.vercel.app/admin/activar` (HTTPS, sin parámetros). Cambiar de dominio requiere actualizar explícitamente esta validación y las URLs permitidas de Supabase Auth.
 - Esta validación **no comprueba** por sí misma que Supabase Auth tenga allowlisted la URL ni que el servicio SMTP pueda entregar correos. Siguen siendo necesarias pruebas de invitación reales con un buzón controlado.
 - No enviar correos al equipo antes de validar contraseña y acceso como Administrador y Redactor.
+
+## Activar el envío sin riesgo (instrucciones operativas)
+
+El panel `/admin/integrantes` muestra los enlaces directos al proyecto correcto, el valor **exacto** que debe cargarse y un botón para comprobar si el secreto de activación quedó configurado. Ningún paso está automatizado con una API de administración de Supabase que no esté disponible.
+
+En **Auth → URL Configuration**, Site URL debe ser `https://pesse-gilt.vercel.app` y Redirect URLs debe incluir `https://pesse-gilt.vercel.app/admin/activar` sin comodines para producción. En **Edge Functions → Secrets**, crear `PESSE_INVITE_REDIRECT_URL` con la misma URL completa.
+
+La comprobación en pantalla confirma **únicamente** la presencia de ese secreto con el destino exacto dentro de la Edge Function; no puede leer la allowlist de Supabase Auth, la plantilla de correo ni comprobar que el SMTP entrega invitaciones. **No** interpretar «configurado» como una prueba completa de entrega. La documentación de Supabase advierte que si `redirectTo` no está permitido, podría descartarlo sin error y derivar al Site URL, lo que impide una activación correcta.
+
+Antes de invitar integrantes reales, usar un buzón de prueba controlado y verificar que la invitación lleva a `/admin/activar`, permite establecer una contraseña de 12+ caracteres, inicia sesión como Redactor y deniega acceso a `/admin/integrantes`. Luego comprobar suspensión y reactivación de esa cuenta de prueba. Nunca enviar claves privadas de Supabase por correo ni en el navegador.
