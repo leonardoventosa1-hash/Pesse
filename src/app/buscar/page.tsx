@@ -25,7 +25,11 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
    try{
     const response=await db.rpc("search_pesse_articles",{search_term:query,page_number:currentPage,page_size:perPage});
     failed=Boolean(response.error);
-    if(!failed)result=response.data as {items?:SearchHit[];total?:number}|null;
+    if(!failed){
+     const data=response.data as {items?:unknown;total?:unknown}|null;
+     if(!data||!Array.isArray(data.items)||typeof data.total!=="number"||!Number.isSafeInteger(data.total)||data.total<0){failed=true}
+     else result=data as {items:SearchHit[];total:number};
+    }
    }catch{failed=true}
   }
  }
