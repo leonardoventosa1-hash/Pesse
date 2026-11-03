@@ -39,6 +39,13 @@ export default async function VideoShowcase({full=false}:{full?:boolean}){
      <a className="pesse-video-channel" href={channel} target="_blank" rel="noopener noreferrer">Explorar canal de YouTube <span aria-hidden="true">↗</span></a>
     </div>
    </div>}
+  <aside className="pesse-stream-promo" aria-label="Pesse Stream">
+   <div><span className="pesse-stream-promo-kicker">PESSE STREAM · CADA LUNES, 22:30 H</span>
+    <h3>La actualidad también se debate.</h3>
+    <p>Política, sociedad y los temas que atraviesan nuestra agenda. Sumate a la conversación por YouTube.</p>
+   </div>
+   <a href={channel} target="_blank" rel="noopener noreferrer" className="pesse-stream-promo-link">Seguir Pesse Stream <span aria-hidden="true">↗</span></a>
+  </aside>
   {!full&&selected.length>0&&<div className="pesse-video-foot"><Link href="/videos" className="pesse-video-all">Explorar todos los videos <span aria-hidden="true">↗</span></Link></div>}
  </section>;
 }
