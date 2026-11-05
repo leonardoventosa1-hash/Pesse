@@ -516,3 +516,14 @@ body[data-brand-variant="light_green"] .home-intro{background:#173d2e}
  .editorial-article .article-main-image .article-cover{max-height:380px}
  .editorial-article .article-body blockquote{padding:16px 18px}
 }
+
+
+/* Ficha editorial pública: créditos verificados y fecha real de revisión */
+.article-updated{margin:11px 0 0;color:#59705f;font-size:12px;font-weight:700}
+.article-main-image .article-cover-caption{display:flex;flex-wrap:wrap;gap:6px 15px;align-items:baseline;padding:13px 2px 0;color:#53665b;font-size:13px;line-height:1.55;border-top:1px solid #e2e9e3}
+.article-cover-caption .article-cover-credit{color:#27523a;font-size:12px;font-weight:800}
+.article-cover-caption .article-cover-credit::before{content:"Foto: "}
+@media(max-width:600px){
+ .article-main-image .article-cover-caption{padding-top:11px;font-size:12px}
+ .article-updated{font-size:12px}
+}
