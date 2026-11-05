@@ -611,3 +611,25 @@ body{color:var(--pesse-ink)}
 .writing-inline-media h3{font-size:18px;margin:0}
 .writing-inline-media label{display:flex;flex-direction:column;gap:8px}
 @media(max-width:650px){.writing-live-preview{padding:14px}.writing-live-preview-header{align-items:flex-start;flex-direction:column}.writing-body-editor .editor-toolbar{top:0}}
+
+/* Editor visual de noticias: escritura directa sin marcas Markdown visibles */
+.visual-editor{background:#fff;border:1px solid #bacdc0;border-radius:10px;overflow:hidden}
+.visual-editor:focus-within{border-color:#43845c;box-shadow:0 0 0 3px rgba(67,132,92,.13)}
+.visual-editor-tools{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:10px 12px;border-bottom:1px solid #dbe7dd;background:#eff5f0}
+.visual-editor-tools button{min-width:37px;min-height:36px;border:1px solid #cedfd1;border-radius:6px;background:#fff;color:#173a28;padding:7px 11px;cursor:pointer;font:700 13px Arial,sans-serif}
+.visual-editor-tools button:hover{background:#dfeee3}
+.visual-editor-tools button:focus-visible{outline:2px solid #287d48;outline-offset:2px}
+.visual-editor-surface{min-height:320px;padding:18px 22px;outline:none;font-size:17px;line-height:1.78;overflow-wrap:anywhere;background:#fff}
+.visual-editor-surface.compact{min-height:100px;font-size:16px;line-height:1.6}
+.visual-editor-surface:empty::before{content:attr(data-placeholder);color:#8b9b90;pointer-events:none}
+.visual-editor-surface p{margin:0 0 15px}
+.visual-editor-surface h2{font-size:26px;line-height:1.25;margin:22px 0 12px}
+.visual-editor-surface h3{font-size:21px;margin:18px 0 10px}
+.visual-editor-surface blockquote{border-left:3px solid #267849;background:#f1f6f2;padding:12px 15px;margin:14px 0}
+.visual-editor-surface a{color:#1b6740;text-decoration:underline}
+.visual-editor-surface figure{margin:18px 0;padding:12px;background:#f1f5f1;border:1px solid #d2dfd3;border-radius:8px}
+.visual-editor-surface figure img{display:block;max-width:100%;height:auto;object-fit:contain;margin:0 auto;border-radius:5px}
+.visual-editor-surface figcaption{font-size:12px;text-align:center;color:#53645a;margin-top:8px}
+.writing-excerpt-editor{display:flex;flex-direction:column;gap:11px}
+.writing-excerpt-editor h3{margin:0;font-size:15px}
+@media(max-width:650px){.visual-editor-surface{padding:15px;min-height:260px}.visual-editor-tools{padding:8px}.visual-editor-tools button{min-height:40px}}
