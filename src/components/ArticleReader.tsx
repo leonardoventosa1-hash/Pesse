@@ -15,6 +15,7 @@ export default function ArticleReader({body,title}:{body:string;title:string}){
    const finish=start+element.offsetHeight;
    const visibleBottom=window.scrollY+window.innerHeight;
    const distance=Math.max(1,finish-start);
+   // 0% before the text is reached, 100% after its end is visible.
    setProgress(Math.max(0,Math.min(100,Math.round((visibleBottom-start)/distance*100))));
   };
   measure();
@@ -34,6 +35,6 @@ export default function ArticleReader({body,title}:{body:string;title:string}){
   </div>
   <div className={"reader-size-"+size}><ArticleBody body={body}/></div>
   <ShareArticle title={title}/>
-  <a href="#contenido-principal" className="reader-back-top">↑ Volver al inicio de la noticia</a>
+  <a href="#inicio-noticia" className="reader-back-top">↑ Volver al inicio de la noticia</a>
  </div>;
 }
