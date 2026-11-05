@@ -593,3 +593,21 @@ body{color:var(--pesse-ink)}
 @media(max-width:720px){.home-locales{grid-template-columns:1fr;margin:55px 0 62px;padding:31px 25px;gap:30px}.home-locales h2{font-size:clamp(38px,9vw,54px)}.home-locales-city{padding:14px 2px}.home-locales-city strong{font-size:22px}.home-cover-side-story{padding-inline:0}}
 @media(max-width:460px){.home-locales{padding:27px 20px;margin-left:-4px;margin-right:-4px}.home-locales-lead>p{font-size:14px}.home-locales-city strong{font-size:20px}.home-locales-number{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.home-cover-lead,.home-cover-side-story,.home-brief,.news-card,.category-news-card,.locality-card{transition:none}}
+
+/* Redacción Pesse: editor visual accesible y fotos dentro de la nota */
+.writing-body-editor{display:flex;flex-direction:column;gap:13px;min-width:0}
+.writing-body-editor .writing-section-title{margin-bottom:0}
+.writing-body-editor .editor-toolbar{position:sticky;top:8px;z-index:4;background:#e9f1eb;border:1px solid #b7d1bc;border-radius:8px;padding:9px;gap:7px}
+.writing-body-editor .editor-toolbar button{min-height:37px;border-radius:6px}
+.writing-body-editor .editor-toolbar button:focus-visible{outline:3px solid #69aa7f}
+.writing-body-editor .writing-body-input{display:flex;flex-direction:column;gap:8px;font-weight:700}
+.writing-body-editor .writing-body-input textarea{width:100%;font-size:16px;line-height:1.7;min-height:250px;resize:vertical}
+.writing-live-preview{background:#fff;border:1px solid #c7d8cd;border-radius:10px;padding:22px;overflow-wrap:anywhere}
+.writing-live-preview-header{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #e1ebe3;padding-bottom:12px;margin-bottom:15px;font-size:13px;color:#20462f}
+.writing-live-preview-header span{font-size:12px;font-weight:400;color:#68786d}
+.writing-live-preview .article-body{font-size:17px;line-height:1.7;white-space:normal}
+.writing-live-preview .article-body figure img{display:block;max-width:100%;height:auto;object-fit:contain}
+.writing-inline-media{display:flex;flex-direction:column;gap:12px;padding:20px;background:#f0f5f1;border:1px solid #d2e0d5;border-radius:9px}
+.writing-inline-media h3{font-size:18px;margin:0}
+.writing-inline-media label{display:flex;flex-direction:column;gap:8px}
+@media(max-width:650px){.writing-live-preview{padding:14px}.writing-live-preview-header{align-items:flex-start;flex-direction:column}.writing-body-editor .editor-toolbar{top:0}}
