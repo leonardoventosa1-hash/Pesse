@@ -3,6 +3,7 @@ import {notFound} from "next/navigation";
 import Link from "next/link";
 import {articleBySlug,publicArticles} from "@/lib/articles";
 import {supabase} from "@/lib/supabase";
+import {localityBySlug} from "@/lib/localities";
 import ArticleReader from "@/components/ArticleReader";
 import type {Metadata} from "next";
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{
@@ -30,6 +31,7 @@ export default async function ArticlePage({params}:{params:Promise<{slug:string}
   publicArticles(24)
  ]);
  const category=categoryResult.data;
+ const locality=article.locality_slug?localityBySlug(article.locality_slug):undefined;
  const more=related.filter(a=>a.id!==article.id&&(article.category_id?a.category_id===article.category_id:true)).slice(0,3);
  return <main className="container main article-page editorial-article">
   <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({
@@ -46,7 +48,7 @@ export default async function ArticlePage({params}:{params:Promise<{slug:string}
   }).replace(/</g,"\\u003c")}}/>
   <Link href="/noticias" className="more-link">← Todas las noticias</Link>
   <div id="inicio-noticia" className="article-heading"><div className="eyebrow">{category?<Link href={`/categoria/${category.slug}`}>{category.name}</Link>:"PESSE · ACTUALIDAD"}</div>
-  <h1>{article.title}</h1><p className="lead">{article.excerpt}</p>
+  <h1>{article.title}</h1>{locality&&<Link className="article-locality-link" href={"/localidades/"+locality.slug}>📍 {locality.name} · {locality.area}</Link>}<p className="lead">{article.excerpt}</p>
   <div className="article-meta-line"><span className="article-source">{article.author_name?`Por ${article.author_name}`:"Publicado en Pesse"}</span><time className="article-date" dateTime={article.published_at??undefined}>{article.published_at?new Date(article.published_at).toLocaleDateString("es-AR",{day:"2-digit",month:"long",year:"numeric"}):""}</time><span aria-label={`Tiempo estimado de lectura: ${estimatedReadingMinutes(article.body)} minutos`}>· {estimatedReadingMinutes(article.body)} min de lectura</span></div>{article.editorial_updated_at&&<p className="article-updated"><time dateTime={article.editorial_updated_at}>Actualizada el {new Date(article.editorial_updated_at).toLocaleDateString("es-AR",{day:"2-digit",month:"long",year:"numeric"})}</time></p>}</div>
   {article.cover_url&&<figure className="article-main-image"><img className="article-cover" src={article.cover_url} alt={article.title} width={1200} height={675} loading="eager" fetchPriority="high" decoding="async"/>{(article.cover_caption||article.cover_credit)&&<figcaption className="article-cover-caption">{article.cover_caption&&<span>{article.cover_caption}</span>}{article.cover_credit&&<span className="article-cover-credit">{article.cover_credit}</span>}</figcaption>}</figure>}
   <div className="article-layout"><div><ArticleReader body={article.body} title={article.title}/></div><aside className="article-sidebar" aria-label="Otras noticias para leer"><div className="eyebrow">SEGUÍ INFORMADO</div><h2>Más en Pesse</h2>{more.length>0?<div className="article-sidebar-list">{more.map((a,i)=><Link key={a.id} href={`/noticias/${a.slug}`} className="article-sidebar-item"><span className="article-sidebar-index">{String(i+1).padStart(2,"0")}</span><span>{a.title}</span></Link>)}</div>:<p>Historias y actualidad para seguir informado.</p>}<Link className="more-link" href="/noticias">Todas las noticias ↗</Link></aside></div>
