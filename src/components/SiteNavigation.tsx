@@ -13,6 +13,7 @@ export default function SiteNavigation({categories,logoUrl}:{categories:Navigati
  <div id="main-navigation" className={"links"+(open?" links-open":"")}>
  <Link href="/" aria-current={pathname==="/"?"page":undefined} onClick={()=>setOpen(false)}>Inicio</Link>
  <Link href="/noticias" aria-current={pathname==="/noticias"?"page":undefined} onClick={()=>setOpen(false)}>Últimas noticias</Link>
+ <Link href="/localidades" aria-current={pathname.startsWith("/localidades")?"page":undefined} onClick={()=>setOpen(false)}>Locales</Link>
  <Link href="/buscar" aria-current={pathname==="/buscar"?"page":undefined} onClick={()=>setOpen(false)}>Buscar</Link>
  {categories.map(({name:label,slug})=><Link className="mobile-category-link" key={slug} href={`/categoria/${slug}`} aria-current={pathname===`/categoria/${slug}`?"page":undefined} onClick={()=>setOpen(false)}>{label}</Link>)}
  </div></nav>

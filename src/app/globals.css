@@ -527,3 +527,26 @@ body[data-brand-variant="light_green"] .home-intro{background:#173d2e}
  .article-main-image .article-cover-caption{padding-top:11px;font-size:12px}
  .article-updated{font-size:12px}
 }
+
+
+/* Regional edition: local news directories and editorial article geo labels */
+.locality-landing>h1{font-size:clamp(36px,5vw,65px);letter-spacing:-.045em;margin:12px 0 15px;line-height:1.06}
+.locality-intro{max-width:670px;color:#51665a;font-size:18px;line-height:1.7}
+.locality-group{margin-top:50px}
+.locality-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.locality-card{background:#fff;border:1px solid #d9e5dc;padding:22px;min-height:132px;display:flex;flex-direction:column;gap:12px;position:relative;transition:border-color .15s,transform .15s}
+.locality-card>span:first-child{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#477b58}
+.locality-card strong{font-size:22px;line-height:1.2;letter-spacing:-.03em}
+.locality-card-arrow{position:absolute;bottom:17px;right:19px;font-size:23px;color:#2b7345}
+.locality-card:hover{border-color:#2a7045;transform:translateY(-2px)}
+.locality-disclaimer{margin-top:42px;font-size:13px;color:#65766a}
+.locality-edition-header{border-bottom:3px solid #244c32;padding:40px 0 28px;margin-bottom:34px}
+.locality-edition-header h1{font-size:clamp(40px,6vw,72px);line-height:1.05;letter-spacing:-.04em;margin:10px 0}
+.locality-edition-header p{max-width:700px;color:#56675e;font-size:18px;line-height:1.6}
+.locality-empty{border:1px solid #d8e2db;background:#fff;padding:30px 34px;margin-top:24px}
+.locality-empty h2{font-size:28px;line-height:1.2}
+.locality-empty p{color:#56685b;line-height:1.65}
+.article-locality-link{display:inline-flex;margin:12px 0 5px;padding:8px 12px;background:#e6f1e8;color:#24583a;font-size:12px;font-weight:800;border-radius:3px}
+a.article-locality-link:hover{background:#d3e7d8}
+@media(max-width:760px){.locality-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.locality-card{min-height:120px;padding:17px}.locality-card strong{font-size:19px}}
+@media(max-width:460px){.locality-grid{grid-template-columns:1fr}.locality-card{min-height:98px}.locality-group{margin-top:38px}}
