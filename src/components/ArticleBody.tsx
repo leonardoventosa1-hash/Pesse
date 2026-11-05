@@ -11,6 +11,7 @@ function inline(text:string):ReactNode[]{
   return <span key={i}>{part}</span>;
  });
 }
+export function ArticleInline({text}:{text:string}){return <>{inline(text)}</>}
 export default function ArticleBody({body}:{body:string}){
  return <div className="article-body">{body.split(/\n{2,}/).map((block,i)=>{
   const value=block.trim();if(!value)return null;
