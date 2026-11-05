@@ -8,6 +8,7 @@ import {getHomepageSections} from "@/lib/homepage-sections";
 import {getSiteSettings} from "@/lib/site-settings";
 import SponsorPlacement from "@/components/SponsorPlacement";
 import type {Article} from "@/lib/supabase";
+import {LOCALITIES} from "@/lib/localities";
 
 const formatDate=(date:string|null)=>date?new Date(date).toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"}):"";
 function StoryDate({article}:{article:Article}){
@@ -85,6 +86,25 @@ export default async function Home(){
      <h3>{article.title}</h3><span className="home-brief-arrow" aria-hidden="true">↗</span>
     </Link>)}</div>
    </section>}
+   <section className="home-locales" aria-labelledby="home-locales-title">
+    <div className="home-locales-lead">
+     <span className="home-locales-overline"><span aria-hidden="true" className="home-locales-signal"/> PESSE / COBERTURA REGIONAL</span>
+     <h2 id="home-locales-title">Lo que pasa <em>cerca.</em></h2>
+     <p>La actualidad de La Matanza y zona oeste también merece estar en primer plano. Explorá las noticias de cada localidad.</p>
+     <Link href="/localidades" className="home-locales-link">Explorar Locales <span aria-hidden="true">↗</span></Link>
+    </div>
+    <div className="home-locales-cities" aria-label="Localidades destacadas">
+     {["san-justo","ramos-mejia","gregorio-de-laferrere","isidro-casanova"].map((slug,i)=>{
+      const locality=LOCALITIES.find(item=>item.slug===slug);
+      return locality?<Link href={"/localidades/"+locality.slug} className="home-locales-city" key={slug}>
+       <span className="home-locales-number">{String(i+1).padStart(2,"0")}</span>
+       <strong>{locality.name}</strong>
+       <span className="home-locales-city-arrow" aria-hidden="true">↗</span>
+      </Link>:null;
+     })}
+     <Link className="home-locales-more" href="/localidades">Ver todas las localidades <span aria-hidden="true">↗</span></Link>
+    </div>
+   </section>
    <SponsorPlacement placement="home_mid"/>
    <HomepageBlocks articles={allArticles} categories={categories} sections={homepageSections}/>
    <SponsorPlacement placement="home_bottom"/>
