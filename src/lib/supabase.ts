@@ -22,5 +22,5 @@ export function supabase(): SupabaseClient | null {
  if(!browserClient)browserClient=createClient(url,key);
  return browserClient;
 }
-export type Article={id:string;slug:string;title:string;excerpt:string;body:string;cover_url:string|null;category_id:string|null;status:"draft"|"published";published_at:string|null;created_at:string;is_featured?:boolean;deleted_at?:string|null;author_name?:string|null;cover_caption?:string|null;cover_credit?:string|null;editorial_updated_at?:string|null};
+export type Article={id:string;slug:string;title:string;excerpt:string;body:string;cover_url:string|null;category_id:string|null;status:"draft"|"published";published_at:string|null;created_at:string;is_featured?:boolean;deleted_at?:string|null;author_name?:string|null;cover_caption?:string|null;cover_credit?:string|null;editorial_updated_at?:string|null;locality_slug?:string|null};
 export type Category={id:string;slug:string;name:string};
