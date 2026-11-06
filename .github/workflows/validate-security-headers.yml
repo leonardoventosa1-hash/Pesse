@@ -1,0 +1,45 @@
+name: Validate Pesse HTTP security headers
+on:
+  pull_request:
+    paths:
+      - "next.config.mjs"
+      - ".github/workflows/validate-security-headers.yml"
+  push:
+    branches: [main]
+    paths:
+      - "next.config.mjs"
+      - ".github/workflows/validate-security-headers.yml"
+permissions:
+  contents: read
+jobs:
+  check-headers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+      - name: Verificar encabezados sin credenciales
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import config from "./next.config.mjs";
+          const rules=await config.headers();
+          const general=rules.find(r=>r.source==="/:path*");
+          const admin=rules.find(r=>r.source==="/admin");
+          const descendants=rules.find(r=>r.source==="/admin/:path*");
+          assert.ok(general&&admin&&descendants,"Faltan rutas de políticas");
+          const get=(rule,key)=>rule.headers.find(h=>h.key.toLowerCase()===key.toLowerCase())?.value;
+          assert.equal(get(general,"X-Content-Type-Options"),"nosniff");
+          assert.equal(get(general,"Referrer-Policy"),"strict-origin-when-cross-origin");
+          assert.match(get(general,"Strict-Transport-Security"),/max-age=/);
+          for(const rule of [admin,descendants]){
+            assert.equal(get(rule,"X-Frame-Options"),"DENY");
+            assert.equal(get(rule,"Content-Security-Policy"),"frame-ancestors 'none'");
+            assert.match(get(rule,"Cache-Control"),/no-store/);
+            assert.match(get(rule,"X-Robots-Tag"),/noindex/);
+          }
+          console.log("Encabezados de seguridad OK");
+          NODE
