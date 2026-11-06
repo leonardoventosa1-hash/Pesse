@@ -646,3 +646,9 @@ body{color:var(--pesse-ink)}
 .visual-editor-source label{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:700;color:#24452e}
 .visual-editor-source textarea{width:100%;font:15px/1.6 ui-monospace,Consolas,monospace;resize:vertical;border-radius:6px;border:1px solid #bacebe;background:#fff;padding:12px}
 .visual-editor-source small{color:#576b5e;line-height:1.5}
+
+.writing-editor-mode-switch{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.writing-editor-mode-switch h2{margin:0}
+.writing-editor-mode-switch button{font-weight:700;border-radius:6px}
+.writing-body-editor>textarea{width:100%;min-height:280px;line-height:1.7;resize:vertical}
+@media(max-width:600px){.writing-editor-mode-switch{align-items:flex-start;flex-direction:column}}
