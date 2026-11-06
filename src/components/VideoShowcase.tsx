@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {publishedVideos,selectedPesseStream,videoCategoryLabels,youtubeThumbnailUrl,youtubeWatchUrl,type EditorialVideo} from "@/lib/editorial-videos";
 import {getSiteSettings,validSocialUrl} from "@/lib/site-settings";
-import {latestArchivedPesseStream} from "@/lib/latest-youtube-stream";
 
 function VideoCard({video,primary=false}:{video:EditorialVideo;primary?:boolean}){
  return <a href={youtubeWatchUrl(video.youtube_id)} className={primary?"pesse-video-card pesse-video-feature":"pesse-video-card"} target="_blank" rel="noopener noreferrer" aria-label={"Ver en YouTube: "+video.title}>
@@ -20,7 +19,7 @@ function VideoCard({video,primary=false}:{video:EditorialVideo;primary?:boolean}
 }
 export default async function VideoShowcase({full=false}:{full?:boolean}){
  const [videos,settings,manualStream]=await Promise.all([publishedVideos(full?24:3),getSiteSettings(),selectedPesseStream()]);
- const latestStream=manualStream?{id:manualStream.youtube_id,title:manualStream.title,source:"manual" as const}:await latestArchivedPesseStream();
+ const latestStream=manualStream?{id:manualStream.youtube_id,title:manualStream.title}:null;
  const channel=validSocialUrl(settings.youtube_url,"youtube.com")?settings.youtube_url:"https://www.youtube.com/@pesseinfo";
  const selected=full?videos:videos.slice(0,3);
  return <section className={full?"pesse-videos-section pesse-videos-full":"pesse-videos-section"} aria-labelledby={full?"video-page-title":"home-video-title"}>
@@ -36,9 +35,9 @@ export default async function VideoShowcase({full=false}:{full?:boolean}){
      <iframe src={"https://www.youtube-nocookie.com/embed/"+latestStream.id+"?rel=0"} title={"Reproducción de "+latestStream.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen/>
     </div>
     <div className="pesse-video-featured-info">
-     <span className="pesse-video-kicker">ÚLTIMO VIVO · PESSE STREAM</span>
+     <span className="pesse-video-kicker">EMISIÓN DESTACADA · PESSE STREAM</span>
      <h3>{latestStream.title}</h3>
-     <p>Reviví el programa más reciente de Pesse Stream. {manualStream?.description||"Mirá la emisión destacada de Pesse Stream. El equipo puede actualizar este video desde el panel editorial."}</p>
+     <p>{manualStream?.description||"Reviví el programa destacado de Pesse Stream. Cada semana el equipo podrá actualizar este video desde el panel editorial."}</p>
      <a href={youtubeWatchUrl(latestStream.id)} target="_blank" rel="noopener noreferrer" className="pesse-video-channel">Ver en YouTube <span aria-hidden="true">↗</span></a>
     </div>
    </div>:selected.length>0?<div className="pesse-video-grid">
@@ -47,7 +46,7 @@ export default async function VideoShowcase({full=false}:{full?:boolean}){
     <div className="pesse-video-empty-art" aria-hidden="true"><span>▶</span><strong>PESSE</strong></div>
     <div><span className="pesse-video-kicker">PESSE STREAM EN YOUTUBE</span>
      <h3>La actualidad también se conversa.</h3>
-     <p>Seguí Pesse Stream en YouTube. Cuando esté disponible la última emisión, vas a poder verla desde acá.</p>
+     <p>Seguí Pesse Stream en YouTube. El equipo de Pesse destacará acá la próxima emisión del programa.</p>
      <a className="pesse-video-channel" href={channel} target="_blank" rel="noopener noreferrer">Explorar canal de YouTube <span aria-hidden="true">↗</span></a>
     </div>
    </div>}
