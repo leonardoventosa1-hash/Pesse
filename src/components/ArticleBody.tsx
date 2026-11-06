@@ -21,8 +21,8 @@ export default function ArticleBody({body}:{body:string}){
   if(image)return <figure key={i}><img src={image[2]} alt={image[1]} loading="lazy"/>{image[1]&&<figcaption>{image[1]}</figcaption>}</figure>;
   const lines=value.split("\n").filter(line=>line.trim());
   if(lines.length&&lines.every(line=>/^[-*] /.test(line)))return <ul key={i}>{lines.map((line,j)=><li key={j}>{inline(line.replace(/^[-*] /,""))}</li>)}</ul>;
-  if(lines.length&&lines.every(line=>/^\d+\. /.test(line)))return <ol key={i}>{lines.map((line,j)=><li key={j}>{inline(line.replace(/^\d+\. /,""))}</li>)}</ol>;
-  if(value.startsWith("> "))return <blockquote key={i}>{inline(value.slice(2))}</blockquote>;
+  if(lines.length&&lines.every(line=>/^\d+\. /.test(line))){const start=Number(lines[0].match(/^(\d+)/)?.[1]||"1");return <ol key={i} start={start}>{lines.map((line,j)=><li key={j}>{inline(line.replace(/^\d+\. /,""))}</li>)}</ol>}
+  if(lines.length&&lines.every(line=>line.startsWith("> ")))return <blockquote key={i}>{lines.map((line,j)=><span key={j}>{j>0&&<br/>}{inline(line.slice(2))}</span>)}</blockquote>;
   return <p key={i}>{value.split("\n").map((line,j)=><span key={j}>{j>0&&<><br/></>}{inline(line)}</span>)}</p>;
  })}</div>
 }

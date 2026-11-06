@@ -4,9 +4,15 @@ import {useEffect,useRef,useState} from "react";
 type Props={value:string;onChange:(next:string)=>void;label:string;compact?:boolean;placeholder?:string};
 const escapeHtml=(s:string)=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 function inlineHtml(s:string){
- return escapeHtml(s).replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")
- .replace(/__([^_]+)__/g,"<u>$1</u>").replace(/\*([^*\n]+)\*/g,"<em>$1</em>")
- .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,(_match,label,url)=>'<a href="'+escapeHtml(url)+'">'+label+'</a>');
+ // Detectar enlaces ANTES de escapar HTML evita convertir & en &amp;amp;.
+ const format=(fragment:string)=>escapeHtml(fragment)
+  .replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")
+  .replace(/__([^_]+)__/g,"<u>$1</u>")
+  .replace(/\*([^*\n]+)\*/g,"<em>$1</em>");
+ return s.split(/(\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g).map(part=>{
+  const match=part.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);
+  return match?'<a href="'+escapeHtml(match[2])+'">'+format(match[1])+"</a>":format(part);
+ }).join("");
 }
 function toHtml(value:string,compact:boolean){
  if(compact)return "<p>"+inlineHtml(value||"").replace(/\n/g,"<br>")+"</p>";
@@ -17,10 +23,11 @@ function toHtml(value:string,compact:boolean){
   if(image)return '<figure contenteditable="false"><img src="'+escapeHtml(image[2])+'" alt="'+escapeHtml(image[1])+'"/><figcaption>'+escapeHtml(image[1])+'</figcaption></figure><p class="visual-editor-writing-line"><br></p>';
   const lines=line.split("\n").filter(item=>item.trim());
   if(lines.length&&lines.every(item=>/^[-*] /.test(item)))return "<ul>"+lines.map(item=>"<li>"+inlineHtml(item.replace(/^[-*] /,""))+"</li>").join("")+"</ul>";
-  if(lines.length&&lines.every(item=>/^\d+\. /.test(item)))return "<ol>"+lines.map(item=>"<li>"+inlineHtml(item.replace(/^\d+\. /,""))+"</li>").join("")+"</ol>";
+  if(lines.length&&lines.every(item=>/^\d+\. /.test(item))){const start=Number(lines[0].match(/^(\d+)/)?.[1]||"1");return '<ol start="'+start+'">'+lines.map(item=>"<li>"+inlineHtml(item.replace(/^\d+\. /,""))+"</li>").join("")+"</ol>"}
   if(line.startsWith("## "))return "<h2>"+inlineHtml(line.slice(3))+"</h2>";
   if(line.startsWith("### "))return "<h3>"+inlineHtml(line.slice(4))+"</h3>";
-  if(line.startsWith("> "))return "<blockquote>"+inlineHtml(line.slice(2))+"</blockquote>";
+  const quoteLines=line.split("\n");
+  if(quoteLines.every(item=>item.startsWith("> ")))return "<blockquote>"+quoteLines.map(item=>inlineHtml(item.slice(2))).join("<br>")+"</blockquote>";
   return "<p>"+line.split("\n").map(inlineHtml).join("<br>")+"</p>";
  }).join("")||"<p><br></p>";
 }
@@ -48,14 +55,15 @@ function toMarkdown(root:HTMLElement,compact:boolean){
   if(child.tagName==="UL"||child.tagName==="OL"){
    const ordered=child.tagName==="OL";
    const items=Array.from(child.children).filter(item=>item.tagName==="LI");
-   if(items.length)parts.push(items.map((item,index)=>(ordered?(index+1)+". ":"- ")+Array.from(item.childNodes).map(parseInline).join("").trim()).join("\n"));
+   const start=ordered?Number(child.getAttribute("start")||"1"):1;
+   if(items.length)parts.push(items.map((item,index)=>(ordered?(start+index)+". ":"- ")+Array.from(item.childNodes).map(parseInline).join("").trim()).join("\n"));
    continue;
   }
   const content=Array.from(child.childNodes).map(parseInline).join("").trim();
   if(!content)continue;
   if(child.tagName==="H2")parts.push("## "+content);
   else if(child.tagName==="H3")parts.push("### "+content);
-  else if(child.tagName==="BLOCKQUOTE")parts.push("> "+content);
+  else if(child.tagName==="BLOCKQUOTE")parts.push(content.split("\n").map(line=>"> "+line).join("\n"));
   else parts.push(content);
  }
  return parts.join("\n\n");
