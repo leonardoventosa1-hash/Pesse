@@ -48,8 +48,10 @@ Migración adicional preparada: `supabase/migrations/20261106194500_version_edit
 - Al intentar aprobar, la base compara la marca temporal guardada con el borrador vigente. Si no coincide, rechaza la aprobación aunque alguien eluda los controles de la interfaz.
 - Los usuarios pueden ver las revisiones desactualizadas y reenviar el contenido corregido. La bandeja impide aprobar una solicitud cuyo artículo cambió y mantiene la opción de solicitar correcciones.
 - Las solicitudes pendientes anteriores sin marca de versión pasarán a `outdated` al ejecutar la migración; no podrán recibir una aprobación retrospectiva sin revisar el contenido.
-- Las solicitudes previamente aprobadas quedan en el historial; **la aprobación no publica la noticia** y no garantiza que el contenido no haya cambiado después.
+- Si la noticia cambia **después de estar aprobada**, también se marca la revisión como `outdated`. Se conservan el nombre del revisor (identificador), la fecha de revisión y sus observaciones, pero **la aprobación deja de ser vigente**. El historial distingue una aprobación obsoleta de una solicitud pendiente invalidada. La aprobación nunca publica automáticamente la noticia.
 
 **Orden previsto:** primero `20261106193000_guard_admin_publication.sql` y luego `20261106194500_version_editorial_reviews.sql`. Son cambios pendientes en GitHub, no aplicados en Supabase.
 
 **Pruebas necesarias al activarlas:** redactor envía borrador → administrador aprueba; redactor cambia un párrafo → solicitud pasa a desactualizada; se reenvía → se puede aprobar nueva versión; intentar aprobar una solicitud obsoleta directamente contra la API debe fallar; publicación sin rol administrador debe fallar. Comprobar además que el borrador original y las notas de revisión permanecen intactos.
+
+**Prueba adicional al activarlo:** aprobar una revisión, modificar un campo editorial del artículo (incluidas fotos, cuerpo o bajada) y comprobar que el estado se convierta en `outdated` preservando `reviewer_id`, `reviewed_at` y `note`. Una nueva versión tiene que presentar una nueva solicitud. Esta verificación aún no se ejecutó en Supabase.
