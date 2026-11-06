@@ -699,3 +699,22 @@ body{color:var(--pesse-ink)}
 .writing-backup-status{margin:14px 0;display:flex;flex-direction:column;gap:5px;padding:13px 16px;border:1px solid #c5dac9;border-left:4px solid #267849;border-radius:7px;background:#f3f8f4;color:#234b30;line-height:1.45;font-size:14px}
 .writing-backup-status strong{font-weight:800}
 .writing-backup-status span{color:#53665a;font-size:13px}
+
+/* Administración visual de fotografías dentro de una noticia. */
+.article-photo-manager{margin:18px 0 20px;padding:18px;border:1px solid #c8dbce;border-radius:10px;background:#f5faf6}
+.article-photo-manager>h3{font-size:17px;margin:0 0 7px}
+.article-photo-manager>p{font-size:13px;line-height:1.5;color:#4f6757;margin:0 0 14px}
+.article-photo-manager-list{display:grid;gap:12px}
+.article-photo-manager-item{display:flex;align-items:start;gap:15px;border:1px solid #d1e0d5;border-radius:9px;background:white;padding:12px}
+.article-photo-manager-item>img{width:145px;max-height:110px;object-fit:contain;background:#eff4f0;border-radius:6px;flex:none}
+.article-photo-manager-controls{display:flex;flex-direction:column;gap:7px;min-width:0;flex:1}
+.article-photo-manager-controls>strong{font-size:14px}
+.article-photo-manager-controls>span{font-size:12px;color:#596e5e;overflow-wrap:anywhere}
+.article-photo-manager-buttons{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.article-photo-manager-buttons button,.article-photo-manager-replace{display:inline-flex;align-items:center;justify-content:center;border:1px solid #b7d1be;border-radius:6px;background:#f4f9f5;color:#205331;font-size:12px;font-weight:700;padding:8px 10px;cursor:pointer;min-height:36px}
+.article-photo-manager-buttons button:hover:not(:disabled),.article-photo-manager-replace:hover:not(.is-disabled){background:#e4f2e8}
+.article-photo-manager-buttons button:disabled,.article-photo-manager-replace.is-disabled{opacity:.45;cursor:not-allowed}
+.article-photo-manager-buttons .article-photo-manager-remove{color:#9a3030;border-color:#e9c4c4;background:#fff6f6}
+.article-photo-manager-replace input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.article-photo-manager-replace:focus-within{outline:2px solid #267849;outline-offset:2px}
+@media(max-width:650px){.article-photo-manager{padding:12px}.article-photo-manager-item{flex-direction:column}.article-photo-manager-item>img{width:100%;height:auto;max-height:200px}.article-photo-manager-buttons button,.article-photo-manager-replace{flex:1 1 auto}}
