@@ -694,3 +694,8 @@ body{color:var(--pesse-ink)}
 .visual-editor-surface .visual-editor-writing-line:has(>br:only-child)::before{content:"Escribí acá para continuar la noticia…";color:#73897a;font-size:14px;pointer-events:none}
 .visual-editor-tools .visual-editor-continue{background:#e7f2eb;color:#1e5634;font-weight:700}
 @media(max-width:650px){.visual-editor-tools .visual-editor-continue{flex:1 1 100%}}
+
+/* Copia automática local mientras el redactor sigue trabajando. */
+.writing-backup-status{margin:14px 0;display:flex;flex-direction:column;gap:5px;padding:13px 16px;border:1px solid #c5dac9;border-left:4px solid #267849;border-radius:7px;background:#f3f8f4;color:#234b30;line-height:1.45;font-size:14px}
+.writing-backup-status strong{font-weight:800}
+.writing-backup-status span{color:#53665a;font-size:13px}
