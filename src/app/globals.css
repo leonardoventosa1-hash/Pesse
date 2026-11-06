@@ -843,3 +843,26 @@ body{color:var(--pesse-ink)}
 .pesse-video-featured-info .pesse-video-channel:hover{background:#033d2d;color:#fff}
 .pesse-video-grid-secondary{margin-top:20px}
 @media(max-width:850px){.pesse-video-featured-stream{grid-template-columns:1fr}.pesse-video-featured-info{padding:24px}.pesse-video-embed{aspect-ratio:16/9}}
+
+/* Panel para fijar manualmente la emisión de Pesse Stream */
+.stream-admin-page{padding-top:34px;padding-bottom:72px}
+.stream-admin-page h1{font-size:clamp(28px,4vw,44px);margin:10px 0 9px}
+.stream-admin-page>p{color:#496456;max-width:770px;line-height:1.6;margin-bottom:28px}
+.stream-admin-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);align-items:start;gap:22px}
+.stream-admin-form,.stream-admin-preview{border:1px solid #d0dfd4;border-radius:10px;background:#fff;padding:22px;display:flex;flex-direction:column;gap:12px}
+.stream-admin-form label{font-size:14px;color:#153c29;font-weight:760}
+.stream-admin-form input,.stream-admin-form textarea{width:100%;min-height:43px;box-sizing:border-box;font:inherit;font-size:14px;border:1px solid #b9cbbe;border-radius:6px;padding:11px 12px;background:#fff;color:#193627}
+.stream-admin-form textarea{resize:vertical}
+.stream-admin-form input:focus-visible,.stream-admin-form textarea:focus-visible{outline:2px solid #398d5f;outline-offset:1px}
+.stream-admin-form input[aria-invalid="true"]{border-color:#b45336}
+.stream-admin-form small,.stream-admin-help{color:#597064;font-size:12px;line-height:1.5}
+.stream-admin-error{font-size:12px;color:#a43232}
+.stream-admin-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.stream-admin-actions button:disabled{opacity:.55;cursor:not-allowed}
+.stream-admin-notice{background:#ebf6ed;border:1px solid #b9d8c2;border-radius:6px;padding:12px;font-size:13px;line-height:1.55;color:#234a32}
+.stream-admin-preview h2{margin:0;font-size:20px}
+.stream-admin-frame{position:relative;width:100%;aspect-ratio:16/9;background:#0a2f22;border-radius:7px;overflow:hidden}
+.stream-admin-frame iframe{width:100%;height:100%;border:0;display:block}
+.stream-admin-preview>p{font-size:14px;color:#3c5d47;line-height:1.5;margin:0}
+.stream-admin-preview>a{font-size:13px;color:#16663e;font-weight:800}
+@media(max-width:850px){.stream-admin-grid{grid-template-columns:1fr}.stream-admin-form,.stream-admin-preview{padding:16px}}
