@@ -19,6 +19,9 @@ export default function ArticleBody({body}:{body:string}){
   if(value.startsWith("### "))return <h3 key={i}>{inline(value.slice(4))}</h3>;
   const image=value.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)$/);
   if(image)return <figure key={i}><img src={image[2]} alt={image[1]} loading="lazy"/>{image[1]&&<figcaption>{image[1]}</figcaption>}</figure>;
+  const lines=value.split("\n").filter(line=>line.trim());
+  if(lines.length&&lines.every(line=>/^[-*] /.test(line)))return <ul key={i}>{lines.map((line,j)=><li key={j}>{inline(line.replace(/^[-*] /,""))}</li>)}</ul>;
+  if(lines.length&&lines.every(line=>/^\d+\. /.test(line)))return <ol key={i}>{lines.map((line,j)=><li key={j}>{inline(line.replace(/^\d+\. /,""))}</li>)}</ol>;
   if(value.startsWith("> "))return <blockquote key={i}>{inline(value.slice(2))}</blockquote>;
   return <p key={i}>{value.split("\n").map((line,j)=><span key={j}>{j>0&&<><br/></>}{inline(line)}</span>)}</p>;
  })}</div>
