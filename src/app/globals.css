@@ -725,3 +725,14 @@ body{color:var(--pesse-ink)}
 .writing-remote-save-status--saving{border-left-color:#9d7a28;background:#fffcf2}
 .writing-remote-save-status--error,.writing-remote-save-status--conflict{border-left-color:#b43d3d;border-color:#e8c2c2;background:#fff7f7;color:#8f2929}
 .writing-remote-save-status button{align-self:flex-start;border:1px solid currentColor;border-radius:5px;background:transparent;color:inherit;padding:6px 9px;cursor:pointer;font-weight:700;font-size:12px}
+
+/* Rich-text lists and consistent editorial controls. */
+.visual-editor-tools{flex-wrap:wrap;row-gap:6px}
+.visual-editor-surface ul,.visual-editor-surface ol{margin:12px 0;padding-left:30px;list-style-position:outside}
+.visual-editor-surface ul{list-style-type:disc}
+.visual-editor-surface ol{list-style-type:decimal}
+.visual-editor-surface li{margin:5px 0;line-height:1.65}
+.article-body ul,.article-body ol{margin:18px 0 22px;padding-left:30px;list-style-position:outside}
+.article-body ul{list-style-type:disc}
+.article-body ol{list-style-type:decimal}
+.article-body li{margin:7px 0;line-height:1.75}
