@@ -45,7 +45,7 @@ try {
  Assert-Exit "Respaldo de Storage"
  $files = @("roles.sql","schema.sql","data.sql","storage-manifest.json")
  foreach ($file in $files) {
-  if (-not (Test-Path (Join-Path $work $file))) { throw "Falta $file: respaldo incompleto." }
+  if (-not (Test-Path (Join-Path $work $file))) { throw "Falta ${file}: respaldo incompleto." }
  }
  $metadata = @{
   project = "Pesse"
