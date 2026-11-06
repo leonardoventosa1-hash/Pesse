@@ -8,7 +8,7 @@ import {getHomepageSections} from "@/lib/homepage-sections";
 import {getSiteSettings} from "@/lib/site-settings";
 import SponsorPlacement from "@/components/SponsorPlacement";
 import type {Article} from "@/lib/supabase";
-import {PARTIDOS} from "@/lib/localities";
+import WestPartiesMap from "@/components/WestPartiesMap";
 
 const formatDate=(date:string|null)=>date?new Date(date).toLocaleDateString("es-AR",{day:"2-digit",month:"short",year:"numeric"}):"";
 function StoryDate({article}:{article:Article}){
@@ -93,14 +93,7 @@ export default async function Home(){
      <p>La actualidad de La Matanza y zona oeste también merece estar en primer plano. Explorá las noticias de cada partido del oeste bonaerense.</p>
      <Link href="/partidos" className="home-locales-link">Explorar partidos <span aria-hidden="true">↗</span></Link>
     </div>
-    <div className="home-locales-cities" aria-label="Partidos de zona oeste">
-     {PARTIDOS.map((partido,i)=><Link href={"/partidos/"+partido.slug} className="home-locales-city" key={partido.slug}>
-      <span className="home-locales-number">{String(i+1).padStart(2,"0")}</span>
-      <strong>{partido.name}</strong>
-      <span className="home-locales-city-arrow" aria-hidden="true">↗</span>
-     </Link>)}
-     <Link className="home-locales-more" href="/partidos">Ver todos los partidos <span aria-hidden="true">↗</span></Link>
-    </div>
+    <WestPartiesMap/>
    </section>
    <SponsorPlacement placement="home_mid"/>
    <HomepageBlocks articles={allArticles} categories={categories} sections={homepageSections}/>
