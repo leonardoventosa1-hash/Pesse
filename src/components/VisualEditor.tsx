@@ -61,7 +61,7 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
  function refreshSelection(){const el=ref.current,selection=window.getSelection();if(!el||!selection||selection.isCollapsed||!selection.rangeCount||!el.contains(selection.anchorNode)||!el.contains(selection.focusNode)){setSelectionMenu(null);return}const selectionRect=selection.getRangeAt(0).getBoundingClientRect();const editorRect=el.getBoundingClientRect();setSelectionMenu({top:Math.max(4,selectionRect.top-editorRect.top-47),left:Math.max(8,Math.min(selectionRect.left-editorRect.left,editorRect.width-220))})}
  function command(name:string){
   const el=ref.current;if(!el)return;el.focus();
-  if(name==="link"){const url=window.prompt("Dirección del enlace (https://):","https://");if(!url)return;try{const parsed=new URL(url);if(!["https:","http:"].includes(parsed.protocol))return;document.execCommand("createLink",false,parsed.href)}catch{return}}
+  if(name==="link"){const selection=window.getSelection();const savedRange=selection&&selection.rangeCount&&el.contains(selection.anchorNode)&&el.contains(selection.focusNode)?selection.getRangeAt(0).cloneRange():null;const url=window.prompt("Dirección del enlace (https://):","https://");if(!url)return;try{const parsed=new URL(url);if(!["https:","http:"].includes(parsed.protocol))return;if(savedRange&&selection){el.focus();selection.removeAllRanges();selection.addRange(savedRange)}document.execCommand("createLink",false,parsed.href)}catch{return}}
   else if(name==="h2"||name==="quote")document.execCommand("formatBlock",false,name==="h2"?"h2":"blockquote");
   else document.execCommand(name,false);
   update();setSelectionMenu(null)
