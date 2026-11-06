@@ -866,3 +866,19 @@ body{color:var(--pesse-ink)}
 .stream-admin-preview>p{font-size:14px;color:#3c5d47;line-height:1.5;margin:0}
 .stream-admin-preview>a{font-size:13px;color:#16663e;font-weight:800}
 @media(max-width:850px){.stream-admin-grid{grid-template-columns:1fr}.stream-admin-form,.stream-admin-preview{padding:16px}}
+
+/* Estado de emisión y recuperación de programas de Pesse Stream */
+.stream-admin-current{display:flex;flex-direction:column;gap:5px;padding:13px 15px;background:#eef7f1;border:1px solid #c5dccb;border-radius:8px;color:#205437}
+.stream-admin-current strong{font-size:13px}
+.stream-admin-current small{font-size:12px;color:#4b7255}
+.stream-admin-current a{font-size:12px;font-weight:750;color:#15633f}
+.stream-admin-history{width:100%;border-top:1px solid #d9e5db;margin-top:8px;padding-top:16px}
+.stream-admin-history h3{margin:0 0 5px;font-size:17px;color:#173c27}
+.stream-admin-history>p{color:#5b7261;font-size:12px;line-height:1.5;margin:0 0 12px}
+.stream-admin-history ul{list-style:none;padding:0;margin:0;display:grid;gap:9px}
+.stream-admin-history li{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #e5ece6}
+.stream-admin-history li>div{display:flex;flex-direction:column;gap:4px;min-width:0}
+.stream-admin-history li strong{font-size:13px;color:#244631;overflow-wrap:anywhere}
+.stream-admin-history li small{font-size:11px;color:#687c6d}
+.stream-admin-history li button{font-size:12px;flex:none;white-space:normal}
+@media(max-width:560px){.stream-admin-history li{align-items:flex-start;flex-direction:column}}
