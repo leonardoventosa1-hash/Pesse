@@ -1,0 +1,33 @@
+name: Validate editorial editor
+on:
+  pull_request:
+    paths:
+      - 'src/components/Editor.tsx'
+      - 'src/components/VisualEditor.tsx'
+      - 'src/components/ArticleBody.tsx'
+      - 'src/app/noticias/**'
+      - 'src/app/globals.css'
+      - 'package.json'
+      - '.github/workflows/editor-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  editor-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript check
+        run: npm run check
+      - name: Build Pesse
+        run: npm run build

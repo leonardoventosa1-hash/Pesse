@@ -593,3 +593,62 @@ body{color:var(--pesse-ink)}
 @media(max-width:720px){.home-locales{grid-template-columns:1fr;margin:55px 0 62px;padding:31px 25px;gap:30px}.home-locales h2{font-size:clamp(38px,9vw,54px)}.home-locales-city{padding:14px 2px}.home-locales-city strong{font-size:22px}.home-cover-side-story{padding-inline:0}}
 @media(max-width:460px){.home-locales{padding:27px 20px;margin-left:-4px;margin-right:-4px}.home-locales-lead>p{font-size:14px}.home-locales-city strong{font-size:20px}.home-locales-number{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.home-cover-lead,.home-cover-side-story,.home-brief,.news-card,.category-news-card,.locality-card{transition:none}}
+
+/* Redacción Pesse: editor visual accesible y fotos dentro de la nota */
+.writing-body-editor{display:flex;flex-direction:column;gap:13px;min-width:0}
+.writing-body-editor .writing-section-title{margin-bottom:0}
+.writing-body-editor .editor-toolbar{position:sticky;top:8px;z-index:4;background:#e9f1eb;border:1px solid #b7d1bc;border-radius:8px;padding:9px;gap:7px}
+.writing-body-editor .editor-toolbar button{min-height:37px;border-radius:6px}
+.writing-body-editor .editor-toolbar button:focus-visible{outline:3px solid #69aa7f}
+.writing-body-editor .writing-body-input{display:flex;flex-direction:column;gap:8px;font-weight:700}
+.writing-body-editor .writing-body-input textarea{width:100%;font-size:16px;line-height:1.7;min-height:250px;resize:vertical}
+.writing-live-preview{background:#fff;border:1px solid #c7d8cd;border-radius:10px;padding:22px;overflow-wrap:anywhere}
+.writing-live-preview-header{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #e1ebe3;padding-bottom:12px;margin-bottom:15px;font-size:13px;color:#20462f}
+.writing-live-preview-header span{font-size:12px;font-weight:400;color:#68786d}
+.writing-live-preview .article-body{font-size:17px;line-height:1.7;white-space:normal}
+.writing-live-preview .article-body figure img{display:block;max-width:100%;height:auto;object-fit:contain}
+.writing-inline-media{display:flex;flex-direction:column;gap:12px;padding:20px;background:#f0f5f1;border:1px solid #d2e0d5;border-radius:9px}
+.writing-inline-media h3{font-size:18px;margin:0}
+.writing-inline-media label{display:flex;flex-direction:column;gap:8px}
+@media(max-width:650px){.writing-live-preview{padding:14px}.writing-live-preview-header{align-items:flex-start;flex-direction:column}.writing-body-editor .editor-toolbar{top:0}}
+
+/* Editor visual de noticias: escritura directa sin marcas Markdown visibles */
+.visual-editor{background:#fff;border:1px solid #bacdc0;border-radius:10px;overflow:hidden}
+.visual-editor:focus-within{border-color:#43845c;box-shadow:0 0 0 3px rgba(67,132,92,.13)}
+.visual-editor-tools{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:10px 12px;border-bottom:1px solid #dbe7dd;background:#eff5f0}
+.visual-editor-tools button{min-width:37px;min-height:36px;border:1px solid #cedfd1;border-radius:6px;background:#fff;color:#173a28;padding:7px 11px;cursor:pointer;font:700 13px Arial,sans-serif}
+.visual-editor-tools button:hover{background:#dfeee3}
+.visual-editor-tools button:focus-visible{outline:2px solid #287d48;outline-offset:2px}
+.visual-editor-surface{min-height:320px;padding:18px 22px;outline:none;font-size:17px;line-height:1.78;overflow-wrap:anywhere;background:#fff}
+.visual-editor-surface.compact{min-height:100px;font-size:16px;line-height:1.6}
+.visual-editor-surface:empty::before{content:attr(data-placeholder);color:#8b9b90;pointer-events:none}
+.visual-editor-surface p{margin:0 0 15px}
+.visual-editor-surface h2{font-size:26px;line-height:1.25;margin:22px 0 12px}
+.visual-editor-surface h3{font-size:21px;margin:18px 0 10px}
+.visual-editor-surface blockquote{border-left:3px solid #267849;background:#f1f6f2;padding:12px 15px;margin:14px 0}
+.visual-editor-surface a{color:#1b6740;text-decoration:underline}
+.visual-editor-surface figure{margin:18px 0;padding:12px;background:#f1f5f1;border:1px solid #d2dfd3;border-radius:8px}
+.visual-editor-surface figure img{display:block;max-width:100%;height:auto;object-fit:contain;margin:0 auto;border-radius:5px}
+.visual-editor-surface figcaption{font-size:12px;text-align:center;color:#53645a;margin-top:8px}
+.writing-excerpt-editor{display:flex;flex-direction:column;gap:11px}
+.writing-excerpt-editor h3{margin:0;font-size:15px}
+@media(max-width:650px){.visual-editor-surface{padding:15px;min-height:260px}.visual-editor-tools{padding:8px}.visual-editor-tools button{min-height:40px}}
+
+/* Contextual editorial formatting when text is selected */
+.visual-editor-content{position:relative}
+.visual-editor-floating{position:absolute;z-index:15;display:flex;gap:3px;align-items:center;padding:5px;border-radius:8px;border:1px solid #b9d3c1;background:#183a29;box-shadow:0 8px 24px rgba(13,38,25,.24)}
+.visual-editor-floating button{border:0;border-radius:4px;background:transparent;color:white;font-size:12px;font-weight:700;padding:7px 10px;min-width:30px;cursor:pointer}
+.visual-editor-floating button:hover,.visual-editor-floating button:focus-visible{background:#2b6342}
+
+.visual-editor-tools .visual-editor-mode{margin-left:auto;background:#e0ede3;color:#214b31}
+.visual-editor-tools .visual-editor-mode[aria-pressed="true"]{background:#1e5b38;color:#fff}
+.visual-editor-source{padding:16px;background:#f6f8f6;display:flex;flex-direction:column;gap:9px}
+.visual-editor-source label{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:700;color:#24452e}
+.visual-editor-source textarea{width:100%;font:15px/1.6 ui-monospace,Consolas,monospace;resize:vertical;border-radius:6px;border:1px solid #bacebe;background:#fff;padding:12px}
+.visual-editor-source small{color:#576b5e;line-height:1.5}
+
+.writing-editor-mode-switch{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.writing-editor-mode-switch h2{margin:0}
+.writing-editor-mode-switch button{font-weight:700;border-radius:6px}
+.writing-body-editor>textarea{width:100%;min-height:280px;line-height:1.7;resize:vertical}
+@media(max-width:600px){.writing-editor-mode-switch{align-items:flex-start;flex-direction:column}}

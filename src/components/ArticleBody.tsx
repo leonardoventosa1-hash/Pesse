@@ -1,14 +1,17 @@
 "use client";
 import {type ReactNode} from "react";
 function inline(text:string):ReactNode[]{
- const parts=text.split(/(\*\*[^*]+\*\*|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g);
+ const parts=text.split(/(\*\*[^*]+\*\*|__[^_]+__|\*[^*\n]+\*|\[[^\]]+\]\(https?:\/\/[^\s)]+\))/g);
  return parts.map((part,i)=>{
   if(part.startsWith("**")&&part.endsWith("**"))return <strong key={i}>{part.slice(2,-2)}</strong>;
+  if(part.startsWith("__")&&part.endsWith("__"))return <u key={i}>{part.slice(2,-2)}</u>;
+  if(part.startsWith("*")&&part.endsWith("*"))return <em key={i}>{part.slice(1,-1)}</em>;
   const match=part.match(/^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/);
   if(match){try{const u=new URL(match[2]);if(["https:","http:"].includes(u.protocol))return <a key={i} href={u.href} target="_blank" rel="noopener noreferrer">{match[1]}</a>}catch{}}
   return <span key={i}>{part}</span>;
  });
 }
+export function ArticleInline({text}:{text:string}){return <>{inline(text)}</>}
 export default function ArticleBody({body}:{body:string}){
  return <div className="article-body">{body.split(/\n{2,}/).map((block,i)=>{
   const value=block.trim();if(!value)return null;
