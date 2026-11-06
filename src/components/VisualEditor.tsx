@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
 
-type Props={value:string;onChange:(next:string)=>void;label:string;compact?:boolean;placeholder?:string;onInsertionPointChange?:(index:number|null)=>void};
+type Props={value:string;onChange:(next:string)=>void;label:string;compact?:boolean;placeholder?:string;onInsertionPointChange?:(index:number|null)=>void;insertedImage?:{url:string;sequence:number}|null};
 const escapeHtml=(s:string)=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 function inlineHtml(s:string){
  // Detectar enlaces ANTES de escapar HTML evita convertir & en &amp;amp;.
@@ -68,14 +68,38 @@ function toMarkdown(root:HTMLElement,compact:boolean){
  }
  return parts.join("\n\n");
 }
-export default function VisualEditor({value,onChange,label,compact=false,placeholder,onInsertionPointChange}:Props){
+export default function VisualEditor({value,onChange,label,compact=false,placeholder,onInsertionPointChange,insertedImage}:Props){
  const ref=useRef<HTMLDivElement>(null),last=useRef<string|null>(null),dirty=useRef(false);
+ const lastImageFocus=useRef<number|null>(null);
  const [selectionMenu,setSelectionMenu]=useState<{top:number;left:number}|null>(null);
  const [sourceMode,setSourceMode]=useState(false);
  useEffect(()=>{
   const el=ref.current;if(!el)return;
   if(value!==last.current){el.innerHTML=toHtml(value,compact);last.current=value}
  },[value,compact]);
+ // Once an image is inserted, put the caret in the editable line following it.
+ // The URL uniquely identifies the image; the sequence also supports repeated inserts.
+ useEffect(()=>{
+  if(!insertedImage||sourceMode||compact||lastImageFocus.current===insertedImage.sequence)return;
+  const el=ref.current;if(!el)return;
+  const figures=Array.from(el.querySelectorAll("figure"));
+  const figure=figures.find(item=>item.querySelector("img")?.getAttribute("src")===insertedImage.url);
+  if(!figure)return;
+  let target=figure.nextElementSibling;
+  if(!(target instanceof HTMLParagraphElement)){
+   const paragraph=document.createElement("p");
+   paragraph.className="visual-editor-writing-line";
+   paragraph.appendChild(document.createElement("br"));
+   figure.insertAdjacentElement("afterend",paragraph);
+   target=paragraph;
+  }
+  const range=document.createRange(),selection=window.getSelection();
+  range.selectNodeContents(target);range.collapse(true);
+  el.focus();selection?.removeAllRanges();selection?.addRange(range);
+  lastImageFocus.current=insertedImage.sequence;
+  onInsertionPointChange?.(Array.from(el.children).filter(child=>child===figure||((child.tagName==="FIGURE"||!!child.textContent?.trim())&&Boolean(child.compareDocumentPosition(figure)&Node.DOCUMENT_POSITION_FOLLOWING))).length);
+  target.scrollIntoView({block:"nearest"});
+ },[insertedImage,sourceMode,compact,value,onInsertionPointChange]);
  function update(){const el=ref.current;if(!el||!dirty.current)return;const next=toMarkdown(el,compact);dirty.current=false;last.current=next;onChange(next)}
  function continueWriting(){
   const el=ref.current;if(!el)return;
