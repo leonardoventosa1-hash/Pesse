@@ -687,3 +687,10 @@ body{color:var(--pesse-ink)}
 .writing-inline-image-preview img{display:block;width:100%;max-height:460px;object-fit:contain;border-radius:6px;background:#eef2ee}
 .writing-inline-image-preview figcaption{font-size:12px;line-height:1.45;color:#536457;word-break:break-word}
 .writing-inline-image-preview p[role="alert"]{margin:0;color:#9c2f2f}
+
+/* A blank editable line next to each read-only photograph must remain clickable. */
+.visual-editor-surface .visual-editor-writing-line{min-height:46px;min-width:100%;margin:9px 0 14px;padding:12px 14px;border:1px dashed #a9c9b4;border-radius:7px;background:#f9fcfa;cursor:text}
+.visual-editor-surface .visual-editor-writing-line:focus-within{border-color:#277a49}
+.visual-editor-surface .visual-editor-writing-line:has(>br:only-child)::before{content:"Escribí acá para continuar la noticia…";color:#73897a;font-size:14px;pointer-events:none}
+.visual-editor-tools .visual-editor-continue{background:#e7f2eb;color:#1e5634;font-weight:700}
+@media(max-width:650px){.visual-editor-tools .visual-editor-continue{flex:1 1 100%}}

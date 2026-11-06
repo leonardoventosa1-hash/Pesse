@@ -10,15 +10,16 @@ function inlineHtml(s:string){
 }
 function toHtml(value:string,compact:boolean){
  if(compact)return "<p>"+inlineHtml(value||"").replace(/\n/g,"<br>")+"</p>";
- return (value||"").split(/\n\s*\n/).map(block=>{
+ const prefix=/^!\[[^\]]*\]\(https?:\/\/[^\s)]+\)/.test((value||"").trim())?'<p class="visual-editor-writing-line"><br></p>':"";
+ return prefix+(value||"").split(/\n\s*\n/).map(block=>{
   const line=block.trim();
   const image=line.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)$/);
-  if(image)return '<figure contenteditable="false"><img src="'+escapeHtml(image[2])+'" alt="'+escapeHtml(image[1])+'"/><figcaption>'+escapeHtml(image[1])+'</figcaption></figure><p></p>';
+  if(image)return '<figure contenteditable="false"><img src="'+escapeHtml(image[2])+'" alt="'+escapeHtml(image[1])+'"/><figcaption>'+escapeHtml(image[1])+'</figcaption></figure><p class="visual-editor-writing-line"><br></p>';
   if(line.startsWith("## "))return "<h2>"+inlineHtml(line.slice(3))+"</h2>";
   if(line.startsWith("### "))return "<h3>"+inlineHtml(line.slice(4))+"</h3>";
   if(line.startsWith("> "))return "<blockquote>"+inlineHtml(line.slice(2))+"</blockquote>";
   return "<p>"+line.split("\n").map(inlineHtml).join("<br>")+"</p>";
- }).join("")||"<p></p>";
+ }).join("")||"<p><br></p>";
 }
 function parseInline(node:Node):string{
  if(node.nodeType===Node.TEXT_NODE)return node.textContent||"";
@@ -59,6 +60,18 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
   if(value!==last.current){el.innerHTML=toHtml(value,compact);last.current=value}
  },[value,compact]);
  function update(){const el=ref.current;if(!el||!dirty.current)return;const next=toMarkdown(el,compact);dirty.current=false;last.current=next;onChange(next)}
+ function continueWriting(){
+  const el=ref.current;if(!el)return;
+  setSelectionMenu(null);
+  let target=el.lastElementChild;
+  if(!(target instanceof HTMLParagraphElement)){
+   const paragraph=document.createElement("p");paragraph.className="visual-editor-writing-line";paragraph.appendChild(document.createElement("br"));el.appendChild(paragraph);target=paragraph
+  }
+  const selection=window.getSelection(),range=document.createRange();
+  range.selectNodeContents(target);range.collapse(true);
+  el.focus();selection?.removeAllRanges();selection?.addRange(range);
+  target.scrollIntoView({block:"nearest",behavior:"auto"});
+ }
  function refreshSelection(){const el=ref.current,selection=window.getSelection();if(!el||!selection||selection.isCollapsed||!selection.rangeCount||!el.contains(selection.anchorNode)||!el.contains(selection.focusNode)){setSelectionMenu(null);return}const selectionRect=selection.getRangeAt(0).getBoundingClientRect();const editorRect=el.getBoundingClientRect();setSelectionMenu({top:Math.max(4,selectionRect.top-editorRect.top-47),left:Math.max(8,Math.min(selectionRect.left-editorRect.left,editorRect.width-220))})}
  function command(name:string){
   const el=ref.current;if(!el)return;el.focus();
@@ -73,7 +86,7 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("italic")} title="Cursiva"><i>C</i></button>
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("underline")} title="Subrayado"><u>S</u></button>
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("link")}>Enlace</button>
-   {!compact&&<><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("h2")}>Subtítulo</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("quote")}>Cita</button></>}
+   {!compact&&<><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("h2")}>Subtítulo</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("quote")}>Cita</button><button type="button" className="visual-editor-continue" onMouseDown={e=>e.preventDefault()} onClick={continueWriting} title="Colocar el cursor después de la última fotografía">Escribir debajo de las fotos</button></>}
    <button type="button" className="visual-editor-mode" onClick={()=>{setSelectionMenu(null);setSourceMode(prev=>!prev)}} aria-pressed={sourceMode}>{sourceMode?"Volver a vista visual":"Ver código del texto"}</button>
   </div>
   {sourceMode&&<div className="visual-editor-source"><label>Modo de texto original<textarea value={value} onChange={e=>{dirty.current=false;last.current=null;onChange(e.target.value)}} rows={compact?5:16} spellCheck/></label><small>Este modo muestra el formato interno de la noticia. Volvé a la vista visual para seguir redactando normalmente.</small></div>}
