@@ -20,3 +20,17 @@ export const LOCALITIES:readonly Locality[] = [
  {slug:"moreno",name:"Moreno",area:"Zona oeste"}
 ] as const;
 export const localityBySlug=(slug:string)=>LOCALITIES.find(locality=>locality.slug===slug);
+
+/**
+ * Agrupación de cobertura por partido bonaerense.
+ * Conserva locality_slug en las noticias existentes para no alterar datos.
+ */
+export type Partido={slug:string;name:string;localitySlugs:readonly string[]};
+export const PARTIDOS:readonly Partido[]=[
+ {slug:"la-matanza",name:"La Matanza",localitySlugs:LOCALITIES.filter(l=>l.area==="La Matanza").map(l=>l.slug)},
+ {slug:"moron",name:"Morón",localitySlugs:["moron","haedo","castelar"]},
+ {slug:"ituzaingo",name:"Ituzaingó",localitySlugs:["ituzaingo"]},
+ {slug:"merlo",name:"Merlo",localitySlugs:["merlo"]},
+ {slug:"moreno",name:"Moreno",localitySlugs:["moreno"]}
+] as const;
+export const partidoBySlug=(slug:string)=>PARTIDOS.find(p=>p.slug===slug);

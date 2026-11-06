@@ -805,3 +805,28 @@ body{color:var(--pesse-ink)}
 .editorial-queue-card-actions textarea{display:block;width:100%;margin-top:5px;border:1px solid #c5d1c8;border-radius:7px;padding:10px;resize:vertical}
 .editorial-queue-card-actions button:disabled{opacity:.48;cursor:not-allowed}
 @media(max-width:700px){.editorial-review-actions,.editorial-queue-card{padding:12px}.editorial-queue-card-actions{max-width:100%;width:100%}}
+
+/* Mapa interactivo de los partidos del oeste bonaerense */
+.home-west-map{position:relative;z-index:1;min-width:0;padding:17px 15px 13px;border:1px solid rgba(194,232,204,.23);border-radius:9px;background:radial-gradient(ellipse at 50% 44%,rgba(105,166,123,.16),transparent 67%),rgba(5,28,16,.31)}
+.home-west-map-heading,.home-west-map-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#c2e5ca;font-size:10px;letter-spacing:.09em;font-weight:850}
+.home-west-map-heading{padding:0 4px 7px}
+.home-west-map-heading span:last-child{color:#9fc0a8;font-weight:650}
+.home-west-map-graphic{position:relative;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}
+.home-west-map-svg{display:block;width:100%;height:auto;max-height:445px;overflow:visible;filter:drop-shadow(0 9px 15px rgba(0,0,0,.22))}
+.home-west-map-region{cursor:pointer;outline:none}
+.home-west-map-region path{fill:#54876b;fill-opacity:.65;stroke:#d6eee0;stroke-width:1.25;vector-effect:non-scaling-stroke;stroke-linejoin:round;transition:fill .18s ease,fill-opacity .18s ease,stroke .18s ease,filter .18s ease}
+.home-west-map-region.is-dimmed path{fill-opacity:.38}
+.home-west-map-region:hover path,.home-west-map-region.is-active path,.home-west-map-region:focus-visible path{fill:#b4e7bd;fill-opacity:1;stroke:#f4fff6;stroke-width:2.4;filter:drop-shadow(0 0 7px rgba(186,245,199,.85))}
+.home-west-map-region:focus-visible path{stroke-dasharray:5 2}
+.home-west-map-tooltip{pointer-events:none;position:absolute;z-index:2;right:8px;top:15px;display:grid;gap:2px;min-width:130px;padding:10px 12px;border:1px solid #d8f6e0;border-radius:7px;background:#f4fff6;color:#163d26;box-shadow:0 5px 18px rgba(0,0,0,.22)}
+.home-west-map-tooltip.follows-cursor{right:auto;transform:translateX(-50%)}
+.home-west-map-tooltip small{font-size:9px;font-weight:850;letter-spacing:.08em;color:#467452}
+.home-west-map-tooltip strong{font-size:16px;line-height:1.25;letter-spacing:-.015em}
+.home-west-map-tooltip span{font-size:11px;color:#2c6e41;font-weight:750}
+.home-west-map-footer{padding:10px 4px 0;font-size:11px;letter-spacing:0}
+.home-west-map-footer>span:last-child{font-size:10px;letter-spacing:.08em;color:#a4cbb0}
+.home-west-map-legend{display:inline-block;width:9px;height:9px;margin-right:5px;border-radius:2px;background:#ade3b8;vertical-align:-1px}
+.home-west-map-source{margin:8px 4px 0!important;font-size:10px!important;line-height:1.4!important;color:#93b7a0!important}
+@media(max-width:900px){.home-west-map-svg{max-height:410px}}
+@media(max-width:700px){.home-west-map{padding:12px 10px}.home-west-map-svg{max-height:430px}.home-west-map-tooltip.follows-cursor{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.home-west-map-region path{transition:none}}
