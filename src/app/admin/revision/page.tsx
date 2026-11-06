@@ -76,7 +76,7 @@ export default function EditorialQueue(){
    <h2>Revisiones anteriores ({history.length})</h2>
    <div className="editorial-queue-list">{history.map(request=><article key={request.id} className="editorial-queue-card">
     <strong>{request.article?.title??"Noticia no disponible"}</strong>
-    <span>{request.status==="approved"?"Aprobada":request.status==="outdated"?"Desactualizada: requiere nueva solicitud":"Correcciones solicitadas"} · {request.reviewed_at?new Date(request.reviewed_at).toLocaleString("es-AR"):""}</span>
+    <span>{request.status==="approved"?"Aprobada":request.status==="outdated"?(request.reviewed_at?"Aprobación anterior desactualizada: requiere nueva revisión":"Solicitud desactualizada: requiere nuevo envío"):"Correcciones solicitadas"} · {request.reviewed_at?new Date(request.reviewed_at).toLocaleString("es-AR"):""}</span>
     {request.note&&<p>{request.note}</p>}
     {request.article&&<Link href={"/admin/editar/"+request.article_id}>Ver noticia privada</Link>}
    </article>)}</div>
