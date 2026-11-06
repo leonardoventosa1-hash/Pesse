@@ -780,3 +780,28 @@ body{color:var(--pesse-ink)}
 .editorial-review-group li small{color:#66776b;font-size:12px;line-height:1.4}
 .editorial-review-summary{margin:16px 0 0;padding:12px 14px;border-radius:8px;background:#edf5ef;color:#2b5438;line-height:1.5;font-size:13px}
 @media(max-width:720px){.editorial-review{padding:13px}.editorial-review-heading{flex-direction:column;gap:10px}.editorial-review-groups{grid-template-columns:1fr}}
+
+/* Circuito editorial: solicitudes de revisión y bandeja del equipo */
+.editorial-review-actions{margin:18px 0;padding:18px;border:1px solid #bdd5c4;border-radius:10px;background:#f5faf6;display:grid;gap:10px}
+.editorial-review-actions h2{margin:0;font-size:18px}
+.editorial-review-actions p{margin:4px 0 0;font-size:13px;line-height:1.5;color:#53665a}
+.editorial-review-state{font-weight:750;color:#225c39!important}
+.editorial-review-note{padding:12px 14px;border-left:3px solid #277449;background:#fff;margin:0;color:#324838;font-size:14px}
+.editorial-review-buttons{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
+.editorial-review-buttons button:disabled{opacity:.48;cursor:not-allowed}
+.editorial-review-actions small{font-size:12px;color:#7b6438}
+.editorial-queue{padding-top:32px;padding-bottom:60px}
+.editorial-queue>h1{margin:12px 0}
+.editorial-queue>h2{margin:25px 0 13px}
+.editorial-queue>p{max-width:850px;line-height:1.5}
+.editorial-queue-notice{padding:12px;border:1px solid #b9d9c2;background:#f1f8f3;border-radius:8px}
+.editorial-queue-list{display:grid;gap:13px}
+.editorial-queue-card{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:16px;background:#fff;border:1px solid #d3ded6;border-radius:9px}
+.editorial-queue-card>div:first-child{flex:1;min-width:190px}
+.editorial-queue-card>div:first-child strong{font-size:16px}
+.editorial-queue-card p,.editorial-queue-card span{color:#54675b;font-size:13px;line-height:1.5;margin:7px 0}
+.editorial-queue-card-actions{display:flex;flex-wrap:wrap;align-items:start;gap:8px;max-width:650px}
+.editorial-queue-card-actions label{flex-basis:100%;font-weight:700;font-size:13px}
+.editorial-queue-card-actions textarea{display:block;width:100%;margin-top:5px;border:1px solid #c5d1c8;border-radius:7px;padding:10px;resize:vertical}
+.editorial-queue-card-actions button:disabled{opacity:.48;cursor:not-allowed}
+@media(max-width:700px){.editorial-review-actions,.editorial-queue-card{padding:12px}.editorial-queue-card-actions{max-width:100%;width:100%}}
