@@ -3,7 +3,7 @@ import type {Metadata} from "next";
 import {PARTIDOS} from "@/lib/localities";
 export const metadata:Metadata={
  title:"Partidos de zona oeste | Pesse",
- description:"Noticias locales de La Matanza, Morón, Ituzaingó, Merlo y Moreno, en el oeste bonaerense.",
+ description:"Noticias locales de La Matanza, Morón, Ituzaingó, Merlo, Moreno, Hurlingham y Tres de Febrero, en el oeste bonaerense.",
  alternates:{canonical:"/partidos"}
 };
 export default function Partidos(){
