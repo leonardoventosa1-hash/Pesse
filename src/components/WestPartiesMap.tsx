@@ -32,7 +32,7 @@ export default function WestPartiesMap(){
     <small>PARTIDO DE</small><strong>{current.name}</strong><span>Ver noticias ↗</span>
    </div>}
   </div>
-  <div className="home-west-map-footer"><span><span className="home-west-map-legend" aria-hidden="true"/> {current?"Seleccionado: "+current.name:"Pasá el cursor o tocá un partido"}</span><span>05 PARTIDOS</span></div>
+  <div className="home-west-map-footer"><span><span className="home-west-map-legend" aria-hidden="true"/> {current?"Seleccionado: "+current.name:"Pasá el cursor o tocá un partido"}</span><span>{String(WEST_PARTY_SHAPES.length).padStart(2,"0")} PARTIDOS</span></div>
   <p className="home-west-map-source">Límites cartográficos simplificados para navegación · Base geográfica IGN/CONAE.</p>
  </div>;
 }
