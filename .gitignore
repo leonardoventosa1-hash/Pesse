@@ -11,3 +11,6 @@ backups/
 *.dump
 *.backup
 *.sql.gz
+pesse-restauracion/
+pesse-restauracion.tar.gz
+pesse-backup-key.txt
