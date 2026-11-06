@@ -11,23 +11,38 @@ on:
       - '.github/workflows/editor-validation.yml'
   workflow_dispatch:
 
+# Una ejecución activa por PR: los commits nuevos descartan validaciones obsoletas.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
 jobs:
-  editor-build:
+  editor-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 3
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Node.js 22
-        uses: actions/setup-node@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          node-version: '22'
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
-      - name: TypeScript check
-        run: npm run check
-      - name: Build Pesse
-        run: npm run build
+          persist-credentials: false
+      # Sin npm install ni build: la compilación se ejecuta UNA sola vez
+      # en Validate public news search cuando cambia src/**.
+      - name: Validar estructura básica del editor sin dependencias
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFile} from "node:fs/promises";
+          import assert from "node:assert/strict";
+          const editor=await readFile("src/components/Editor.tsx","utf8");
+          const visual=await readFile("src/components/VisualEditor.tsx","utf8");
+          const article=await readFile("src/components/ArticleBody.tsx","utf8");
+          assert.match(editor,/export default function Editor\(/);
+          assert.match(editor,/async function save\(/);
+          assert.match(editor,/is_editor/);
+          assert.match(editor,/function exportMarkdown\(/);
+          assert.match(visual,/export default function VisualEditor\(/);
+          assert.ok(article.includes("ArticleBody"),"Falta ArticleBody");
+          console.log("Contrato editorial OK (sin compilar dos veces)");
+          NODE
