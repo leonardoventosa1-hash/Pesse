@@ -718,3 +718,10 @@ body{color:var(--pesse-ink)}
 .article-photo-manager-replace input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
 .article-photo-manager-replace:focus-within{outline:2px solid #267849;outline-offset:2px}
 @media(max-width:650px){.article-photo-manager{padding:12px}.article-photo-manager-item{flex-direction:column}.article-photo-manager-item>img{width:100%;height:auto;max-height:200px}.article-photo-manager-buttons button,.article-photo-manager-replace{flex:1 1 auto}}
+
+/* Estado de guardado remoto solo para borradores ya creados. */
+.writing-remote-save-status{margin:12px 0;padding:13px 16px;border:1px solid #b7d6bf;border-left:4px solid #29764a;background:#f3faf5;border-radius:7px;display:flex;flex-direction:column;gap:5px;font-size:14px;line-height:1.4;color:#1d5433}
+.writing-remote-save-status span{font-size:13px;color:#52685b}
+.writing-remote-save-status--saving{border-left-color:#9d7a28;background:#fffcf2}
+.writing-remote-save-status--error,.writing-remote-save-status--conflict{border-left-color:#b43d3d;border-color:#e8c2c2;background:#fff7f7;color:#8f2929}
+.writing-remote-save-status button{align-self:flex-start;border:1px solid currentColor;border-radius:5px;background:transparent;color:inherit;padding:6px 9px;cursor:pointer;font-weight:700;font-size:12px}
