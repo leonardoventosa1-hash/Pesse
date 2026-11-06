@@ -67,14 +67,16 @@ export default function StreamSettings(){
     :await db.from("editorial_videos").insert(data).select("id,youtube_id,title,description,status,published_at").single();
    if(result.error||!result.data)throw result.error||Error("No se devolvió el registro guardado.");
    const saved=result.data as SavedStream;
+   let archiveFailed=false;
    if(!same&&record?.status==="published"){
     const {error:archiveError}=await db.from("editorial_videos").update({status:"archived"}).eq("id",record.id).eq("status","published");
-    if(archiveError)setNotice("El nuevo video quedó publicado, pero no se pudo archivar la emisión anterior. Revisá el historial.");
+    archiveFailed=!!archiveError;
    }
    if(!same)setHistory(current=>record?[{...record,status:record.status==="published"?"archived":record.status},...current]:current);
    setRecord(saved);
    setTitle(cleanedTitle);
-   if(same||!record||record.status!=="published")setNotice("Video destacado guardado. Ya podés comprobarlo en la portada.");
+   if(archiveFailed)setNotice("El nuevo video quedó publicado, pero no se pudo archivar la emisión anterior. Recargá el panel para verificar.");
+   else if(same||!record||record.status!=="published")setNotice("Video destacado guardado. Ya podés comprobarlo en la portada.");
    else setNotice("Nueva emisión destacada. El programa anterior quedó en el historial para recuperarlo.");
   }catch(error){setNotice("No se pudo guardar el video: "+(error instanceof Error?error.message:"Error desconocido"))}
   finally{setBusy(false)}
