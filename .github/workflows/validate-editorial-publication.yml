@@ -49,6 +49,11 @@ jobs:
           assert.match(versionSql,/AFTER UPDATE ON public\.articles/i);
           assert.match(versionSql,/status=\x27outdated\x27/);
           assert.match(versionSql,/Article changed: request a new review/);
+          assert.match(versionSql,/status IN \\('pending','approved'\\)/);
+          assert.match(versionSql,/status = 'outdated' AND \\(/);
+          assert.match(versionSql,/reviewer_id IS NOT NULL AND reviewed_at IS NOT NULL/);
+          assert.match(queue,/Aprobación anterior desactualizada/);
+          assert.match(actions,/La aprobación anterior dejó de estar vigente/);
           assert.match(queue,/request\.article_updated_at/);
           assert.match(actions,/Revisión desactualizada/);
           console.log("Contrato editorial y migraciones preparadas OK; falta activar y probar en Supabase.");
