@@ -52,6 +52,7 @@ function toMarkdown(root:HTMLElement,compact:boolean){
 export default function VisualEditor({value,onChange,label,compact=false,placeholder}:Props){
  const ref=useRef<HTMLDivElement>(null),last=useRef<string|null>(null);
  const [selectionMenu,setSelectionMenu]=useState<{top:number;left:number}|null>(null);
+ const [sourceMode,setSourceMode]=useState(false);
  useEffect(()=>{
   const el=ref.current;if(!el)return;
   if(value!==last.current){el.innerHTML=toHtml(value,compact);last.current=value}
@@ -72,8 +73,10 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("underline")} title="Subrayado"><u>S</u></button>
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("link")}>Enlace</button>
    {!compact&&<><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("h2")}>Subtítulo</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("quote")}>Cita</button></>}
+   <button type="button" className="visual-editor-mode" onClick={()=>{setSelectionMenu(null);setSourceMode(prev=>!prev)}} aria-pressed={sourceMode}>{sourceMode?"Volver a vista visual":"Ver código del texto"}</button>
   </div>
-  <div className="visual-editor-content"><div ref={ref} className={"visual-editor-surface"+(compact?" compact":"")} onMouseUp={refreshSelection} onKeyUp={refreshSelection} contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Escribí acá..."} onInput={update} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"))}} suppressContentEditableWarning/>
+  {sourceMode&&<div className="visual-editor-source"><label>Modo de texto original<textarea value={value} onChange={e=>{last.current=null;onChange(e.target.value)}} rows={compact?5:16} spellCheck/></label><small>Este modo muestra el formato interno de la noticia. Volvé a la vista visual para seguir redactando normalmente.</small></div>}
+  <div className="visual-editor-content" style={sourceMode?{display:"none"}:undefined}><div ref={ref} className={"visual-editor-surface"+(compact?" compact":"")} onMouseUp={refreshSelection} onKeyUp={refreshSelection} contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Escribí acá..."} onInput={update} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"))}} suppressContentEditableWarning/>
    {selectionMenu&&<div className="visual-editor-floating" style={{top:selectionMenu.top,left:selectionMenu.left}} role="toolbar" aria-label="Dar formato a la selección">
     <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("bold")} title="Negrita"><b>N</b></button>
     <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("italic")} title="Cursiva"><i>C</i></button>
