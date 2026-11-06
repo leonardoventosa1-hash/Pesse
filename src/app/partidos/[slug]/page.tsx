@@ -11,7 +11,7 @@ export async function generateMetadata({params}:{params:Promise<{slug:string}>})
 }
 export default async function Partido({params,searchParams}:{params:Promise<{slug:string}>;searchParams:Promise<{page?:string}>}){
  const {slug}=await params;const partido=partidoBySlug(slug);if(!partido)notFound();
- const {page}=await searchParams;const raw=typeof page==="string"&&/^\\d{1,4}$/.test(page)?Number(page):1;
+ const {page}=await searchParams;const raw=typeof page==="string"&&/^\d{1,4}$/.test(page)?Number(page):1;
  const currentPage=Math.min(1000,Math.max(1,raw)),pageSize=12,db=supabase();
  let articles:Article[]=[];let total=0;let error=false;
  if(!db)error=true;
