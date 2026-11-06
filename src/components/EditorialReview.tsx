@@ -2,9 +2,9 @@
 type Check={label:string;ok:boolean;detail:string};
 type Props={
  title:string;slug:string;excerpt:string;body:string;category:string;
- cover:string;coverCaption:string;coverCredit:string;authorName:string;status:"draft"|"published";
+ cover:string;coverCaption:string;coverCredit:string;authorName:string;status:"draft"|"published";canPublish:boolean;
 };
-export default function EditorialReview({title,slug,excerpt,body,category,cover,coverCaption,coverCredit,authorName,status}:Props){
+export default function EditorialReview({title,slug,excerpt,body,category,cover,coverCaption,coverCredit,authorName,status,canPublish}:Props){
  const required:Check[]=[
   {label:"Título",ok:title.trim().length>=8,detail:"Al menos 8 caracteres"},
   {label:"Dirección de la noticia",ok:!!slug.trim(),detail:"URL amigable para el artículo"},
@@ -42,7 +42,7 @@ export default function EditorialReview({title,slug,excerpt,body,category,cover,
   </div>
   <p className="editorial-review-summary" role="status">{missingRequired
    ? "Faltan "+missingRequired+" requisito(s) para publicar. Podés continuar redactando y guardar el borrador."
-   : status==="published"?"Los requisitos obligatorios están completos. Para publicar todavía tendrás que confirmar la acción.":"Los requisitos obligatorios están completos. Podés seguir trabajando como borrador o elegir publicar."
+   : status==="published"?"Los requisitos obligatorios están completos. Para publicar todavía tendrás que confirmar la acción.":canPublish?"Los requisitos obligatorios están completos. Podés seguir trabajando como borrador o elegir publicar.":"Los requisitos obligatorios están completos. Guardá el borrador y envialo a revisión para que un administrador decida su publicación."
   } {warnings?"Hay "+warnings+" recomendación(es) por revisar.":""}</p>
  </section>;
 }
