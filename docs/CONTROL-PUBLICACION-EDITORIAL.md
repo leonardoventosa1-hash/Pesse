@@ -37,3 +37,19 @@ La función consulta `public.is_admin()` y se ejecuta antes de escribir en `publ
 El trigger restringe quién puede publicar, pero **no exige necesariamente una revisión aprobada para cada publicación administrativa**. Para imponer doble aprobación de forma estricta habría que diseñar una política adicional y resolver el caso de noticias del propio administrador, correcciones posteriores y versiones revisadas.
 
 No se deben presentar estas verificaciones como completas hasta ejecutarlas con los roles reales en Supabase.
+
+
+## Revisión ligada a una versión exacta del borrador (nueva mejora)
+
+Migración adicional preparada: `supabase/migrations/20261106194500_version_editorial_reviews.sql`.
+
+- Al crear una solicitud, un trigger registra en el servidor el `updated_at` de la noticia en `article_updated_at`. No se confía en un valor enviado desde el navegador.
+- Si el contenido cambia mientras la solicitud está pendiente, el trigger de artículos la mueve a estado `outdated`. Se conserva en el historial, y deja libre la posibilidad de enviar otra solicitud (índice de una pendiente por artículo).
+- Al intentar aprobar, la base compara la marca temporal guardada con el borrador vigente. Si no coincide, rechaza la aprobación aunque alguien eluda los controles de la interfaz.
+- Los usuarios pueden ver las revisiones desactualizadas y reenviar el contenido corregido. La bandeja impide aprobar una solicitud cuyo artículo cambió y mantiene la opción de solicitar correcciones.
+- Las solicitudes pendientes anteriores sin marca de versión pasarán a `outdated` al ejecutar la migración; no podrán recibir una aprobación retrospectiva sin revisar el contenido.
+- Las solicitudes previamente aprobadas quedan en el historial; **la aprobación no publica la noticia** y no garantiza que el contenido no haya cambiado después.
+
+**Orden previsto:** primero `20261106193000_guard_admin_publication.sql` y luego `20261106194500_version_editorial_reviews.sql`. Son cambios pendientes en GitHub, no aplicados en Supabase.
+
+**Pruebas necesarias al activarlas:** redactor envía borrador → administrador aprueba; redactor cambia un párrafo → solicitud pasa a desactualizada; se reenvía → se puede aprobar nueva versión; intentar aprobar una solicitud obsoleta directamente contra la API debe fallar; publicación sin rol administrador debe fallar. Comprobar además que el borrador original y las notas de revisión permanecen intactos.
