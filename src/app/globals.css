@@ -652,3 +652,14 @@ body{color:var(--pesse-ink)}
 .writing-editor-mode-switch button{font-weight:700;border-radius:6px}
 .writing-body-editor>textarea{width:100%;min-height:280px;line-height:1.7;resize:vertical}
 @media(max-width:600px){.writing-editor-mode-switch{align-items:flex-start;flex-direction:column}}
+
+/* Indicador de subida de fotografías al servidor (sin porcentaje simulado). */
+.writing-image-upload-progress{margin:12px 0 14px;padding:13px 15px;border:1px solid #c3d8c8;background:#f2f8f4;border-radius:9px;display:flex;flex-direction:column;gap:9px}
+.writing-image-upload-progress-heading{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;color:#174d2d}
+.writing-image-upload-progress small{color:#536a5b;line-height:1.45}
+.writing-image-upload-track{height:8px;background:#d5e5d9;border-radius:999px;position:relative;overflow:hidden}
+.writing-image-upload-fill{display:block;position:absolute;left:-36%;top:0;height:100%;width:36%;border-radius:999px;background:#237846;animation:writing-upload-slide 1.3s ease-in-out infinite}
+.writing-upload-spinner{display:inline-block;width:16px;height:16px;flex:none;border:2px solid #a9cbb4;border-top-color:#237846;border-radius:50%;animation:writing-upload-spin .8s linear infinite}
+@keyframes writing-upload-slide{0%{left:-36%}100%{left:100%}}
+@keyframes writing-upload-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.writing-image-upload-fill{animation:none;left:0;width:100%;opacity:.75}.writing-upload-spinner{animation:none}}
