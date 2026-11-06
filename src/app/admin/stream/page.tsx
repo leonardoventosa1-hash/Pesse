@@ -80,9 +80,8 @@ export default function StreamSettings(){
  }
  return <main className="container main stream-admin-page">
   <Link className="more-link" href="/admin">← Volver a la sala de redacción</Link>
-  <div className="eyebrow">PESSE STREAM · CONFIGURACIÓN EDITORIAL</div>
   <h1>Video destacado de Pesse Stream</h1>
-  <p>Copiá el enlace del vivo que quedó grabado en YouTube. Ese video tendrá prioridad sobre la detección automática y aparecerá en el reproductor de la portada.</p>
+  <p>Copiá el enlace del vivo que quedó grabado en YouTube.</p>
   {loading?<p role="status">Cargando configuración…</p>:authorized?<div className="stream-admin-grid">
    <form className="stream-admin-form" onSubmit={e=>{e.preventDefault();void publish()}}>
     <label htmlFor="stream-video-url">Enlace del video de YouTube</label>
