@@ -50,21 +50,21 @@ function toMarkdown(root:HTMLElement,compact:boolean){
  return parts.join("\n\n");
 }
 export default function VisualEditor({value,onChange,label,compact=false,placeholder}:Props){
- const ref=useRef<HTMLDivElement>(null),last=useRef<string|null>(null);
+ const ref=useRef<HTMLDivElement>(null),last=useRef<string|null>(null),dirty=useRef(false);
  const [selectionMenu,setSelectionMenu]=useState<{top:number;left:number}|null>(null);
  const [sourceMode,setSourceMode]=useState(false);
  useEffect(()=>{
   const el=ref.current;if(!el)return;
   if(value!==last.current){el.innerHTML=toHtml(value,compact);last.current=value}
  },[value,compact]);
- function update(){const el=ref.current;if(!el)return;const next=toMarkdown(el,compact);last.current=next;onChange(next)}
+ function update(){const el=ref.current;if(!el||!dirty.current)return;const next=toMarkdown(el,compact);dirty.current=false;last.current=next;onChange(next)}
  function refreshSelection(){const el=ref.current,selection=window.getSelection();if(!el||!selection||selection.isCollapsed||!selection.rangeCount||!el.contains(selection.anchorNode)||!el.contains(selection.focusNode)){setSelectionMenu(null);return}const selectionRect=selection.getRangeAt(0).getBoundingClientRect();const editorRect=el.getBoundingClientRect();setSelectionMenu({top:Math.max(4,selectionRect.top-editorRect.top-47),left:Math.max(8,Math.min(selectionRect.left-editorRect.left,editorRect.width-220))})}
  function command(name:string){
   const el=ref.current;if(!el)return;el.focus();
   if(name==="link"){const selection=window.getSelection();const savedRange=selection&&selection.rangeCount&&el.contains(selection.anchorNode)&&el.contains(selection.focusNode)?selection.getRangeAt(0).cloneRange():null;const url=window.prompt("Dirección del enlace (https://):","https://");if(!url)return;try{const parsed=new URL(url);if(!["https:","http:"].includes(parsed.protocol))return;if(savedRange&&selection){el.focus();selection.removeAllRanges();selection.addRange(savedRange)}document.execCommand("createLink",false,parsed.href)}catch{return}}
   else if(name==="h2"||name==="quote")document.execCommand("formatBlock",false,name==="h2"?"h2":"blockquote");
   else document.execCommand(name,false);
-  update();setSelectionMenu(null)
+  dirty.current=true;update();setSelectionMenu(null)
  }
  return <section className="visual-editor" aria-label={label}>
   <div className="visual-editor-tools" role="toolbar" aria-label={"Formato de "+label}>
@@ -75,8 +75,8 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
    {!compact&&<><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("h2")}>Subtítulo</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("quote")}>Cita</button></>}
    <button type="button" className="visual-editor-mode" onClick={()=>{setSelectionMenu(null);setSourceMode(prev=>!prev)}} aria-pressed={sourceMode}>{sourceMode?"Volver a vista visual":"Ver código del texto"}</button>
   </div>
-  {sourceMode&&<div className="visual-editor-source"><label>Modo de texto original<textarea value={value} onChange={e=>{last.current=null;onChange(e.target.value)}} rows={compact?5:16} spellCheck/></label><small>Este modo muestra el formato interno de la noticia. Volvé a la vista visual para seguir redactando normalmente.</small></div>}
-  <div className="visual-editor-content" style={sourceMode?{display:"none"}:undefined}><div ref={ref} className={"visual-editor-surface"+(compact?" compact":"")} onMouseUp={refreshSelection} onKeyUp={refreshSelection} contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Escribí acá..."} onInput={update} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"))}} suppressContentEditableWarning/>
+  {sourceMode&&<div className="visual-editor-source"><label>Modo de texto original<textarea value={value} onChange={e=>{dirty.current=false;last.current=null;onChange(e.target.value)}} rows={compact?5:16} spellCheck/></label><small>Este modo muestra el formato interno de la noticia. Volvé a la vista visual para seguir redactando normalmente.</small></div>}
+  <div className="visual-editor-content" style={sourceMode?{display:"none"}:undefined}><div ref={ref} className={"visual-editor-surface"+(compact?" compact":"")} onMouseUp={refreshSelection} onKeyUp={refreshSelection} contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Escribí acá..."} onInput={()=>{dirty.current=true;update()}} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"))}} suppressContentEditableWarning/>
    {selectionMenu&&<div className="visual-editor-floating" style={{top:selectionMenu.top,left:selectionMenu.left}} role="toolbar" aria-label="Dar formato a la selección">
     <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("bold")} title="Negrita"><b>N</b></button>
     <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("italic")} title="Cursiva"><i>C</i></button>
