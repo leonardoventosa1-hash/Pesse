@@ -34,3 +34,21 @@ export async function publishedVideos(limit=12):Promise<EditorialVideo[]>{
   return error?[]:(data??[]) as EditorialVideo[];
  }catch{return []}
 }
+
+/**
+ * Emisión elegida por un administrador desde /admin/stream.
+ * Se consulta por fecha de publicación de la selección y NO por display_order:
+ * no se desplaza accidentalmente con la grilla de videos editoriales.
+ */
+export async function selectedPesseStream():Promise<EditorialVideo|null>{
+ const db=supabase();if(!db)return null;
+ try{
+  const {data,error}=await db.from("editorial_videos")
+   .select("id,youtube_id,title,description,category,status,display_order,published_at,created_at")
+   .eq("category","stream").eq("status","published")
+   .lte("published_at",new Date().toISOString())
+   .order("published_at",{ascending:false}).limit(1).maybeSingle();
+  if(error||!data||!youtubeIdFromUrl("https://youtu.be/"+data.youtube_id))return null;
+  return data as EditorialVideo;
+ }catch{return null}
+}
