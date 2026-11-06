@@ -6,8 +6,8 @@ export default function WestPartiesMap(){
  const [active,setActive]=useState<string|null>(null);
  const [position,setPosition]=useState<{x:number;y:number}|null>(null);
  const current=WEST_PARTY_SHAPES.find(partido=>partido.slug===active);
- function track(event:React.MouseEvent<SVGAElement>){
-  const svg=event.currentTarget.ownerSVGElement;
+ function track(event:React.MouseEvent<HTMLAnchorElement>){
+  const svg=event.currentTarget.closest("svg");
   if(!svg)return;
   const box=svg.getBoundingClientRect();
   setPosition({x:Math.max(78,Math.min(event.clientX-box.left,box.width-95)),y:Math.max(22,event.clientY-box.top-47)});
