@@ -1,0 +1,60 @@
+name: Validate editorial publication permissions
+on:
+  pull_request:
+    paths:
+      - "src/components/Editor.tsx"
+      - "src/components/EditorialReview.tsx"
+      - "src/components/EditorialReviewActions.tsx"
+      - "src/app/admin/revision/page.tsx"
+      - "supabase/migrations/*guard_admin_publication.sql"
+      - "supabase/migrations/*version_editorial_reviews.sql"
+      - ".github/workflows/validate-editorial-publication.yml"
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      # El build y TypeScript se validan en el flujo general para src/**.
+      # Esta prueba especializada no instala dependencias.
+      - name: Validate publication permission contract (sin credenciales)
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import {readFile} from "node:fs/promises";
+          const editor=await readFile("src/components/Editor.tsx","utf8");
+          const review=await readFile("src/components/EditorialReview.tsx","utf8");
+          const sql=await readFile("supabase/migrations/20261106193000_guard_admin_publication.sql","utf8");
+          const versionSql=await readFile("supabase/migrations/20261106194500_version_editorial_reviews.sql","utf8");
+          const queue=await readFile("src/app/admin/revision/page.tsx","utf8");
+          const actions=await readFile("src/components/EditorialReviewActions.tsx","utf8");
+          assert.match(editor,/editorialRole!=="admin"/,"El editor debe impedir publicación sin permisos");
+          assert.match(editor,/<option value="published">Publicar<\/option>/);
+          assert.match(editor,/editorialRole==="admin"&&<option/);
+          assert.match(review,/canPublish:boolean/,"Checklist debe diferenciar administradores");
+          assert.match(sql,/before insert or update on public\.articles/i);
+          assert.match(sql,/new\.status = 'published'/);
+          assert.match(sql,/old\.status = 'published'/);
+          assert.match(sql,/not public\.is_admin\(\)/);
+          assert.match(sql,/revoke all on function public\.guard_article_publication\(\)/i);
+          assert.match(versionSql,/ADD COLUMN IF NOT EXISTS article_updated_at/);
+          assert.match(versionSql,/AFTER UPDATE ON public\.articles/i);
+          assert.match(versionSql,/status=\x27outdated\x27/);
+          assert.match(versionSql,/Article changed: request a new review/);
+          assert.match(versionSql,/status IN \('pending','approved'\)/);
+          assert.match(versionSql,/status = 'outdated' AND \(/);
+          assert.match(versionSql,/reviewer_id IS NOT NULL AND reviewed_at IS NOT NULL/);
+          assert.match(queue,/Aprobación anterior desactualizada/);
+          assert.match(actions,/La aprobación anterior dejó de estar vigente/);
+          assert.match(queue,/request\.article_updated_at/);
+          assert.match(actions,/Revisión desactualizada/);
+          console.log("Contrato editorial y migraciones preparadas OK; falta activar y probar en Supabase.");
+          NODE

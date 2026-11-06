@@ -6,9 +6,9 @@ import {supabase} from "@/lib/supabase";
 import {getRole} from "@/lib/roles";
 
 type Request={
- id:string;article_id:string;author_id:string;status:"pending"|"changes_requested"|"approved";note:string;
+ id:string;article_id:string;author_id:string;status:"pending"|"changes_requested"|"approved"|"outdated";note:string;article_updated_at:string|null;
  requested_at:string;reviewed_at:string|null;
- article:{id:string;title:string;status:string;slug:string;deleted_at:string|null}|null;
+ article:{id:string;title:string;status:string;slug:string;deleted_at:string|null;updated_at:string|null}|null;
 };
 export default function EditorialQueue(){
  const router=useRouter();
@@ -25,7 +25,7 @@ export default function EditorialQueue(){
    const {data:{user},error}=await db.auth.getUser();if(error)throw error;
    if(!user){router.replace("/admin/login");return}
    const r=await getRole();if(!r)throw Error("No tenés permisos editoriales.");
-   const response=await db.from("editorial_review_requests").select("id,article_id,author_id,status,note,requested_at,reviewed_at,article:articles(id,title,status,slug,deleted_at)").order("requested_at",{ascending:false}).limit(100);
+   const response=await db.from("editorial_review_requests").select("id,article_id,author_id,status,note,requested_at,reviewed_at,article_updated_at,article:articles(id,title,status,slug,deleted_at,updated_at)").order("requested_at",{ascending:false}).limit(100);
    if(response.error)throw response.error;
    if(active){setRole(r);setRequests((response.data??[]) as unknown as Request[]);setMessage("")}
   }catch(e){if(active)setMessage(e instanceof Error?e.message:"No se pudo abrir la bandeja.")}
@@ -33,6 +33,7 @@ export default function EditorialQueue(){
  })();return()=>{active=false}},[router,refresh]);
  async function review(request:Request,decision:"approved"|"changes_requested"){
   if(role!=="admin"||busyId||request.status!=="pending"||request.article?.status!=="draft"||request.article.deleted_at)return;
+  if(decision==="approved"&&(!request.article_updated_at||request.article.updated_at!==request.article_updated_at)){setMessage("El borrador cambió desde que se envió: guardá una versión actualizada y solicitá una nueva revisión.");return}
   const note=(notes[request.id]??"").trim();
   if(decision==="changes_requested"&&!note){setMessage("Escribí primero qué debe corregir el redactor.");return}
   const db=supabase();if(!db)return;
@@ -64,18 +65,18 @@ export default function EditorialQueue(){
    <div className="editorial-queue-list">{pending.map(request=><article key={request.id} className="editorial-queue-card">
     <div><strong>{request.article?.title??"Noticia no disponible"}</strong><p>Enviada el {new Date(request.requested_at).toLocaleString("es-AR")} · {request.article?.status==="draft"?"Borrador":"La noticia ya no es un borrador"}</p></div>
     <div className="editorial-queue-card-actions">
-     {request.article&&<Link className="secondary-button" href={"/admin/editar/"+request.article_id}>Abrir noticia privada</Link>}
+     {request.article&&<Link className="secondary-button" href={"/admin/editar/"+request.article_id}>Abrir noticia privada</Link>}{(!request.article_updated_at||request.article?.updated_at!==request.article_updated_at)&&<p role="status">Este borrador cambió después de solicitar la revisión. No se puede aprobar esta versión. Cerrá la solicitud como correcciones y pedí que la envíen nuevamente.</p>}
      {role==="admin"&&request.article?.status==="draft"&&!request.article.deleted_at&&<>
       <label>Observaciones para el redactor<textarea rows={3} maxLength={2000} value={notes[request.id]??""} onChange={e=>setNotes(current=>({...current,[request.id]:e.target.value}))} placeholder="Indicá datos a verificar o correcciones necesarias..."/></label>
       <button type="button" className="secondary-button" disabled={busyId!==null} onClick={()=>void review(request,"changes_requested")}>Solicitar correcciones</button>
-      <button type="button" className="primary-button" disabled={busyId!==null} onClick={()=>void review(request,"approved")}>Aprobar revisión</button>
+      <button type="button" className="primary-button" disabled={busyId!==null||!request.article_updated_at||request.article.updated_at!==request.article_updated_at} onClick={()=>void review(request,"approved")}>Aprobar revisión</button>
      </>}
     </div>
    </article>)}</div>
    <h2>Revisiones anteriores ({history.length})</h2>
    <div className="editorial-queue-list">{history.map(request=><article key={request.id} className="editorial-queue-card">
     <strong>{request.article?.title??"Noticia no disponible"}</strong>
-    <span>{request.status==="approved"?"Aprobada":"Correcciones solicitadas"} · {request.reviewed_at?new Date(request.reviewed_at).toLocaleString("es-AR"):""}</span>
+    <span>{request.status==="approved"?"Aprobada":request.status==="outdated"?(request.reviewed_at?"Aprobación anterior desactualizada: requiere nueva revisión":"Solicitud desactualizada: requiere nuevo envío"):"Correcciones solicitadas"} · {request.reviewed_at?new Date(request.reviewed_at).toLocaleString("es-AR"):""}</span>
     {request.note&&<p>{request.note}</p>}
     {request.article&&<Link href={"/admin/editar/"+request.article_id}>Ver noticia privada</Link>}
    </article>)}</div>
