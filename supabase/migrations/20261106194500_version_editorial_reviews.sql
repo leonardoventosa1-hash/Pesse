@@ -16,8 +16,13 @@ ALTER TABLE public.editorial_review_requests
 ALTER TABLE public.editorial_review_requests
   ADD CONSTRAINT review_response_consistency
   CHECK (
-    (status IN ('pending','outdated') AND reviewer_id IS NULL AND reviewed_at IS NULL)
+    (status = 'pending' AND reviewer_id IS NULL AND reviewed_at IS NULL)
     OR (status IN ('approved','changes_requested') AND reviewer_id IS NOT NULL AND reviewed_at IS NOT NULL)
+    -- Al invalidar una aprobación anterior conservamos responsable y fecha.
+    OR (status = 'outdated' AND (
+      (reviewer_id IS NULL AND reviewed_at IS NULL)
+      OR (reviewer_id IS NOT NULL AND reviewed_at IS NOT NULL)
+    ))
   );
 
 -- La versión del artículo la registra el servidor, no el navegador.
@@ -59,7 +64,8 @@ CREATE TRIGGER capture_editorial_review_version_trigger
 BEFORE INSERT OR UPDATE ON public.editorial_review_requests
 FOR EACH ROW EXECUTE FUNCTION public.capture_editorial_review_version();
 
--- La modificación del texto invalida cualquier solicitud pendiente.
+-- La modificación del contenido invalida solicitudes pendientes Y aprobaciones previas,
+-- conservando reviewer_id y reviewed_at para que el historial siga siendo auditable.
 -- Los cambios de formato mínimos también deben revisarse si afectan el contenido.
 CREATE OR REPLACE FUNCTION public.invalidate_stale_editorial_reviews()
 RETURNS trigger
@@ -81,7 +87,7 @@ BEGIN
  THEN
     UPDATE public.editorial_review_requests
        SET status='outdated'
-     WHERE article_id=NEW.id AND status='pending';
+     WHERE article_id=NEW.id AND status IN ('pending','approved');
  END IF;
  RETURN NEW;
 END;
