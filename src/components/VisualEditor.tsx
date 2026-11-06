@@ -29,6 +29,7 @@ function parseInline(node:Node):string{
  if(node.tagName==="EM"||node.tagName==="I")return "*"+text+"*";
  if(node.tagName==="U")return "__"+text+"__";
  if(node.tagName==="A"){const href=node.getAttribute("href")||"";return /^https?:\/\//i.test(href)?"["+text+"]("+href+")":text}
+ if(node.tagName==="SPAN"){const style=node.style;const weight=style.fontWeight;const isBold=weight==="bold"||Number(weight)>=600;const isItalic=style.fontStyle==="italic";const isUnderlined=style.textDecorationLine.includes("underline")||style.textDecoration.includes("underline");let result=text;if(isBold)result="**"+result+"**";if(isItalic)result="*"+result+"*";if(isUnderlined)result="__"+result+"__";return result}
  return text;
 }
 function toMarkdown(root:HTMLElement,compact:boolean){
