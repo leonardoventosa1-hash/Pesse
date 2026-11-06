@@ -24,6 +24,10 @@ export default async function Home(){
  const categoryNames=new Map(categories.map(c=>[c.id,c.name]));
  const sectionLabel=(article:Article)=>categoryNames.get(article.category_id??"")??"Actualidad";
  const categoryShortcuts=categories.slice(0,5);
+ // No duplicar historias ya presentes en los destacados de apertura.
+ const showcasedIds=new Set(featured.map(article=>article.id));
+ const recentArticles=allArticles.filter(article=>!showcasedIds.has(article.id)).slice(0,6);
+
  return <>
   <section className="topline home-topline"><div className="container topline-inner"><span>PESSE · PERIODISMO DIGITAL</span><span>LA MATANZA · ZONA OESTE · ARGENTINA</span></div></section>
   <section className="home-intro">
@@ -42,7 +46,7 @@ export default async function Home(){
   </section>
   <main className="container main pesse-home">
    {categoryShortcuts.length>0&&<nav aria-label="Accesos rápidos a secciones" className="home-shortcuts">
-    <span>Explorá</span>{categoryShortcuts.map(c=><Link key={c.id} href={`/categoria/${c.slug}`}>{c.name} <span aria-hidden="true">↗</span></Link>)}
+    <span>Explorá</span><Link href="#home-cover-title" className="home-shortcuts-feature">Destacadas</Link><Link href={recentArticles.length?"#home-latest-title":"/noticias"} className="home-shortcuts-feature">Últimas noticias</Link><Link href="#home-locales-title" className="home-shortcuts-feature">Zona oeste</Link>{categoryShortcuts.map(c=><Link key={c.id} href={`/categoria/${c.slug}`}>{c.name} <span aria-hidden="true">↗</span></Link>)}
     <Link href="/buscar" className="home-shortcuts-search">Buscar noticias <span aria-hidden="true">⌕</span></Link>
    </nav>}
    <section className="home-cover" aria-labelledby="home-cover-title">
@@ -85,6 +89,27 @@ export default async function Home(){
      <span className="home-story-kicker">{sectionLabel(article)} <span aria-hidden="true">·</span> <StoryDate article={article}/></span>
      <h3>{article.title}</h3><span className="home-brief-arrow" aria-hidden="true">↗</span>
     </Link>)}</div>
+   </section>}
+   {recentArticles.length>0&&<section className="home-latest" aria-labelledby="home-latest-title">
+    <div className="home-section-head home-latest-head">
+     <div><div className="eyebrow">SEGUÍ INFORMÁNDOTE</div><h2 id="home-latest-title">Últimas noticias<span className="home-heading-dot">.</span></h2></div>
+     <Link href="/noticias" className="home-section-more">Ir al archivo completo <span aria-hidden="true">↗</span></Link>
+    </div>
+    <div className="home-latest-grid">
+     {recentArticles.map((article,i)=><Link className="home-latest-item" href={`/noticias/${article.slug}`} key={article.id}>
+      <div className="home-latest-item-content">
+       <span className="home-latest-number" aria-hidden="true">{String(i+1).padStart(2,"0")}</span>
+       <div className="home-latest-item-copy">
+        <div className="home-story-kicker">{sectionLabel(article)} <span aria-hidden="true">·</span> <StoryDate article={article}/></div>
+        <h3>{article.title}</h3>
+        {article.excerpt&&<p>{article.excerpt}</p>}
+       </div>
+      </div>
+      <div className="home-latest-item-media" aria-hidden="true">{article.cover_url?<img src={article.cover_url} alt="" width={160} height={120} loading="lazy" decoding="async"/>:<span>P.</span>}</div>
+      <span className="home-latest-arrow" aria-hidden="true">↗</span>
+     </Link>)}
+    </div>
+    <div className="home-latest-footer"><Link href="/noticias">Todas las noticias de Pesse <span aria-hidden="true">↗</span></Link></div>
    </section>}
    <section className="home-locales" aria-labelledby="home-locales-title">
     <div className="home-locales-lead">
