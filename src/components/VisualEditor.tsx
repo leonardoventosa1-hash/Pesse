@@ -9,7 +9,7 @@ function inlineHtml(s:string){
  .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,(_match,label,url)=>'<a href="'+escapeHtml(url)+'">'+label+'</a>');
 }
 function toHtml(value:string,compact:boolean){
- if(compact)return "<p>"+inlineHtml(value||"").replace(/\\n/g,"<br>")+"</p>";
+ if(compact)return "<p>"+inlineHtml(value||"").replace(/\n/g,"<br>")+"</p>";
  return (value||"").split(/\n\s*\n/).map(block=>{
   const line=block.trim();
   const image=line.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)$/);
@@ -32,7 +32,7 @@ function parseInline(node:Node):string{
  return text;
 }
 function toMarkdown(root:HTMLElement,compact:boolean){
- if(compact)return Array.from(root.childNodes).map(node=>{if(node instanceof HTMLElement&&["P","DIV"].includes(node.tagName))return Array.from(node.childNodes).map(parseInline).join("");return parseInline(node)}).filter(Boolean).join("\\n").trim();
+ if(compact)return Array.from(root.childNodes).map(node=>{if(node instanceof HTMLElement&&["P","DIV"].includes(node.tagName))return Array.from(node.childNodes).map(parseInline).join("");return parseInline(node)}).filter(Boolean).join("\n").trim();
  const parts:string[]=[];
  for(const child of Array.from(root.childNodes)){
   if(child.nodeType===Node.TEXT_NODE){if(child.textContent?.trim())parts.push(child.textContent.trim());continue}
