@@ -736,3 +736,26 @@ body{color:var(--pesse-ink)}
 .article-body ul{list-style-type:disc}
 .article-body ol{list-style-type:decimal}
 .article-body li{margin:7px 0;line-height:1.75}
+
+/* Organizador editorial por bloques */
+.writing-block-organizer{margin:17px 0 20px;border:1px solid #c7d8ce;border-radius:10px;background:#f7faf8;overflow:hidden}
+.writing-block-organizer-toggle{display:flex;justify-content:space-between;align-items:center;gap:15px;width:100%;padding:15px 17px;border:0;background:transparent;color:#1c4e33;text-align:left;cursor:pointer}
+.writing-block-organizer-toggle span:first-child{display:flex;flex-direction:column;gap:3px}
+.writing-block-organizer-toggle strong{font-size:15px}
+.writing-block-organizer-toggle small{font-size:12px;color:#5b7062}
+.writing-block-organizer-toggle>span:last-child{font-size:22px}
+.writing-block-organizer-panel{padding:0 15px 15px}
+.writing-block-organizer-panel>p{font-size:13px;color:#536c5b;line-height:1.5;margin:0 0 12px}
+.writing-block-organizer-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.writing-block-organizer-item{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #d5e3d9;border-radius:8px;padding:10px}
+.writing-block-organizer-number{display:grid;place-items:center;flex:none;width:27px;height:27px;background:#eaf3ed;border-radius:50%;font-size:12px;font-weight:750;color:#245b37}
+.writing-block-organizer-thumbnail{width:64px;height:46px;object-fit:cover;border-radius:5px;background:#f0f3f1;flex:none}
+.writing-block-organizer-description{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}
+.writing-block-organizer-description strong{font-size:12px;color:#27643d}
+.writing-block-organizer-description>span{font-size:13px;line-height:1.45;color:#273b2e;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere}
+.writing-block-organizer-actions{display:flex;gap:6px;flex:none}
+.writing-block-organizer-actions button{border:1px solid #bdd2c3;background:#f4faf5;color:#25593a;border-radius:6px;font-size:12px;font-weight:650;cursor:pointer;padding:8px}
+.writing-block-organizer-actions button:hover:not(:disabled){background:#e3f1e7}
+.writing-block-organizer-actions button:disabled{opacity:.4;cursor:not-allowed}
+.writing-block-organizer-toggle:focus-visible,.writing-block-organizer-actions button:focus-visible{outline:2px solid #236c3d;outline-offset:2px}
+@media(max-width:650px){.writing-block-organizer-item{flex-wrap:wrap}.writing-block-organizer-actions{width:100%;justify-content:flex-end}.writing-block-organizer-description{flex-basis:calc(100% - 50px)}}
