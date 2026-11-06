@@ -29,7 +29,7 @@ export default async function Home(){
  const recentArticles=allArticles.filter(article=>!showcasedIds.has(article.id)).slice(0,6);
 
  return <>
-  <section className="topline home-topline"><div className="container topline-inner"><span>PESSE · PERIODISMO DIGITAL</span><span>LA MATANZA · ZONA OESTE · ARGENTINA</span></div></section>
+  <section className="topline home-topline"><div className="container topline-inner"><span>ZONA OESTE · PROVINCIA DE BUENOS AIRES · ARGENTINA</span></div></section>
   <section className="home-intro">
    <div className="container home-intro-inner">
     <div className="home-intro-copy">
