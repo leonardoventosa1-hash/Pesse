@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
 
-type Props={value:string;onChange:(next:string)=>void;label:string;compact?:boolean;placeholder?:string};
+type Props={value:string;onChange:(next:string)=>void;label:string;compact?:boolean;placeholder?:string;onInsertionPointChange?:(index:number|null)=>void};
 const escapeHtml=(s:string)=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 function inlineHtml(s:string){
  // Detectar enlaces ANTES de escapar HTML evita convertir & en &amp;amp;.
@@ -68,7 +68,7 @@ function toMarkdown(root:HTMLElement,compact:boolean){
  }
  return parts.join("\n\n");
 }
-export default function VisualEditor({value,onChange,label,compact=false,placeholder}:Props){
+export default function VisualEditor({value,onChange,label,compact=false,placeholder,onInsertionPointChange}:Props){
  const ref=useRef<HTMLDivElement>(null),last=useRef<string|null>(null),dirty=useRef(false);
  const [selectionMenu,setSelectionMenu]=useState<{top:number;left:number}|null>(null);
  const [sourceMode,setSourceMode]=useState(false);
@@ -88,6 +88,25 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
   range.selectNodeContents(target);range.collapse(true);
   el.focus();selection?.removeAllRanges();selection?.addRange(range);
   target.scrollIntoView({block:"nearest",behavior:"auto"});
+ }
+ function rememberInsertionPoint(){
+  if(compact||sourceMode||!onInsertionPointChange)return;
+  const el=ref.current,selection=window.getSelection();
+  if(!el||!selection||!selection.rangeCount||!selection.anchorNode||!el.contains(selection.anchorNode))return;
+  let block:Node|null=selection.anchorNode;
+  while(block&&block.parentNode!==el)block=block.parentNode;
+  if(!block)return;
+  // Each meaningful top-level element is one Markdown block. The empty writing
+  // line after a photo must not shift its position.
+  let index=0;
+  for(const child of Array.from(el.childNodes)){
+   if(child.nodeType===Node.TEXT_NODE){if(child.textContent?.trim())index++}
+   else if(child instanceof HTMLElement){
+    if(child.tagName==="FIGURE"||child.textContent?.trim())index++;
+   }
+   if(child===block)break;
+  }
+  onInsertionPointChange(index);
  }
  function refreshSelection(){const el=ref.current,selection=window.getSelection();if(!el||!selection||selection.isCollapsed||!selection.rangeCount||!el.contains(selection.anchorNode)||!el.contains(selection.focusNode)){setSelectionMenu(null);return}const selectionRect=selection.getRangeAt(0).getBoundingClientRect();const editorRect=el.getBoundingClientRect();setSelectionMenu({top:Math.max(4,selectionRect.top-editorRect.top-47),left:Math.max(8,Math.min(selectionRect.left-editorRect.left,editorRect.width-220))})}
  function command(name:string){
@@ -109,7 +128,7 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
    <button type="button" className="visual-editor-mode" onClick={()=>{setSelectionMenu(null);setSourceMode(prev=>!prev)}} aria-pressed={sourceMode}>{sourceMode?"Volver a vista visual":"Ver código del texto"}</button>
   </div>
   {sourceMode&&<div className="visual-editor-source"><label>Modo de texto original<textarea value={value} onChange={e=>{dirty.current=false;last.current=null;onChange(e.target.value)}} rows={compact?5:16} spellCheck/></label><small>Este modo muestra el formato interno de la noticia. Volvé a la vista visual para seguir redactando normalmente.</small></div>}
-  <div className="visual-editor-content" style={sourceMode?{display:"none"}:undefined}><div ref={ref} className={"visual-editor-surface"+(compact?" compact":"")} onMouseUp={refreshSelection} onKeyUp={refreshSelection} contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Escribí acá..."} onInput={()=>{dirty.current=true;update()}} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"))}} suppressContentEditableWarning/>
+  <div className="visual-editor-content" style={sourceMode?{display:"none"}:undefined}><div ref={ref} className={"visual-editor-surface"+(compact?" compact":"")} onMouseUp={()=>{refreshSelection();rememberInsertionPoint()}} onKeyUp={()=>{refreshSelection();rememberInsertionPoint()}} onFocus={rememberInsertionPoint} contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Escribí acá..."} onInput={()=>{dirty.current=true;update();rememberInsertionPoint()}} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"))}} suppressContentEditableWarning/>
    {selectionMenu&&<div className="visual-editor-floating" style={{top:selectionMenu.top,left:selectionMenu.left}} role="toolbar" aria-label="Dar formato a la selección">
     <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("bold")} title="Negrita"><b>N</b></button>
     <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("italic")} title="Cursiva"><i>C</i></button>
