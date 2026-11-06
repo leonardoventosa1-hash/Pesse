@@ -33,7 +33,7 @@ export default function EditorialReviewActions({articleId,status,unsavedChanges}
  }
  return <section className="editorial-review-actions" aria-label="Circuito de revisión">
   <div><h2>Revisión entre integrantes</h2><p>Solicitá una lectura de la versión guardada. Si después cambiás el contenido, la solicitud pendiente quedará desactualizada y tendrás que enviarla nuevamente.</p></div>
-  <p className="editorial-review-state">{latest?latest.status==="pending"?"Pendiente de revisión":latest.status==="approved"?"Revisión aprobada — la publicación sigue siendo manual":latest.status==="outdated"?"Revisión desactualizada: guardá el borrador y volvé a enviarlo":"Correcciones solicitadas":"Todavía no se solicitó revisión para esta noticia."}</p>
+  <p className="editorial-review-state">{latest?latest.status==="pending"?"Pendiente de revisión":latest.status==="approved"?"Revisión aprobada — la publicación sigue siendo manual":latest.status==="outdated"?(latest.reviewed_at?"La aprobación anterior dejó de estar vigente después de nuevos cambios. Enviá la versión actual a revisión.":"Revisión desactualizada: guardá el borrador y volvé a enviarlo"):"Correcciones solicitadas":"Todavía no se solicitó revisión para esta noticia."}</p>
   {latest?.note&&<blockquote className="editorial-review-note"><strong>Observaciones:</strong> {latest.note}</blockquote>}
   <div className="editorial-review-buttons">
    <button type="button" className="secondary-button" disabled={busy||pending||unsavedChanges||status!=="draft"} onClick={()=>void submit()}>{busy?"Enviando…":latest?.status==="changes_requested"||latest?.status==="outdated"?"Reenviar a revisión":"Enviar a revisión"}</button>
