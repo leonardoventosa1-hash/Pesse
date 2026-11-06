@@ -668,3 +668,14 @@ body{color:var(--pesse-ink)}
 .writing-image-upload-progress--inline{position:fixed;right:20px;bottom:20px;z-index:100;width:min(420px,calc(100vw - 40px));margin:0;background:#f2f8f4;box-shadow:0 12px 36px rgba(12,35,22,.22);border:2px solid #237846}
 .writing-image-upload-filename{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:100%;font-weight:700}
 @media(max-width:600px){.writing-image-upload-progress--inline{left:12px;right:12px;bottom:12px;width:auto}}
+
+/* Confirmación persistente: la carga del archivo no equivale a guardar la noticia. */
+.writing-upload-result{position:fixed;bottom:20px;right:20px;z-index:105;display:flex;align-items:flex-start;gap:11px;width:min(440px,calc(100vw - 40px));padding:15px;border:1px solid #7dac8a;border-left:5px solid #237846;border-radius:10px;background:#f3faf5;box-shadow:0 12px 36px rgba(12,35,22,.22);color:#174d2d}
+.writing-upload-result--error{border-color:#dba6a6;border-left-color:#b13737;background:#fff5f5;color:#7c2525}
+.writing-upload-result-symbol{display:grid;place-items:center;flex:none;width:26px;height:26px;border-radius:50%;background:#237846;color:#fff;font-weight:800}
+.writing-upload-result--error .writing-upload-result-symbol{background:#b13737}
+.writing-upload-result-text{display:flex;flex:1;flex-direction:column;gap:4px;font-size:14px;line-height:1.4;min-width:0}
+.writing-upload-result-text strong{font-size:15px}
+.writing-upload-result-close{border:0;background:transparent;color:inherit;font-size:24px;line-height:1;cursor:pointer;padding:0 3px}
+.writing-upload-result-close:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+@media(max-width:600px){.writing-upload-result{left:12px;right:12px;bottom:12px;width:auto}}
