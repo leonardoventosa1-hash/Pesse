@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useRef} from "react";
+import {useEffect,useRef,useState} from "react";
 
 type Props={value:string;onChange:(next:string)=>void;label:string;compact?:boolean;placeholder?:string};
 const escapeHtml=(s:string)=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -51,17 +51,19 @@ function toMarkdown(root:HTMLElement,compact:boolean){
 }
 export default function VisualEditor({value,onChange,label,compact=false,placeholder}:Props){
  const ref=useRef<HTMLDivElement>(null),last=useRef<string|null>(null);
+ const [selectionMenu,setSelectionMenu]=useState<{top:number;left:number}|null>(null);
  useEffect(()=>{
   const el=ref.current;if(!el)return;
   if(value!==last.current){el.innerHTML=toHtml(value,compact);last.current=value}
  },[value,compact]);
  function update(){const el=ref.current;if(!el)return;const next=toMarkdown(el,compact);last.current=next;onChange(next)}
+ function refreshSelection(){const el=ref.current,selection=window.getSelection();if(!el||!selection||selection.isCollapsed||!selection.rangeCount||!el.contains(selection.anchorNode)||!el.contains(selection.focusNode)){setSelectionMenu(null);return}const selectionRect=selection.getRangeAt(0).getBoundingClientRect();const editorRect=el.getBoundingClientRect();setSelectionMenu({top:Math.max(4,selectionRect.top-editorRect.top-47),left:Math.max(8,Math.min(selectionRect.left-editorRect.left,editorRect.width-220))})}
  function command(name:string){
   const el=ref.current;if(!el)return;el.focus();
   if(name==="link"){const url=window.prompt("Dirección del enlace (https://):","https://");if(!url)return;try{const parsed=new URL(url);if(!["https:","http:"].includes(parsed.protocol))return;document.execCommand("createLink",false,parsed.href)}catch{return}}
   else if(name==="h2"||name==="quote")document.execCommand("formatBlock",false,name==="h2"?"h2":"blockquote");
   else document.execCommand(name,false);
-  update()
+  update();setSelectionMenu(null)
  }
  return <section className="visual-editor" aria-label={label}>
   <div className="visual-editor-tools" role="toolbar" aria-label={"Formato de "+label}>
@@ -71,6 +73,12 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("link")}>Enlace</button>
    {!compact&&<><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("h2")}>Subtítulo</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("quote")}>Cita</button></>}
   </div>
-  <div ref={ref} className={"visual-editor-surface"+(compact?" compact":"")} contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Escribí acá..."} onInput={update} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"))}} suppressContentEditableWarning/>
+  <div className="visual-editor-content"><div ref={ref} className={"visual-editor-surface"+(compact?" compact":"")} onMouseUp={refreshSelection} onKeyUp={refreshSelection} contentEditable role="textbox" aria-label={label} aria-multiline="true" data-placeholder={placeholder||"Escribí acá..."} onInput={update} onBlur={update} onPaste={e=>{e.preventDefault();document.execCommand("insertText",false,e.clipboardData.getData("text/plain"))}} suppressContentEditableWarning/>
+   {selectionMenu&&<div className="visual-editor-floating" style={{top:selectionMenu.top,left:selectionMenu.left}} role="toolbar" aria-label="Dar formato a la selección">
+    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("bold")} title="Negrita"><b>N</b></button>
+    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("italic")} title="Cursiva"><i>C</i></button>
+    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("underline")} title="Subrayado"><u>S</u></button>
+    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("link")}>Enlace</button>
+   </div>}</div>
  </section>
 }
