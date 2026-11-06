@@ -759,3 +759,24 @@ body{color:var(--pesse-ink)}
 .writing-block-organizer-actions button:disabled{opacity:.4;cursor:not-allowed}
 .writing-block-organizer-toggle:focus-visible,.writing-block-organizer-actions button:focus-visible{outline:2px solid #236c3d;outline-offset:2px}
 @media(max-width:650px){.writing-block-organizer-item{flex-wrap:wrap}.writing-block-organizer-actions{width:100%;justify-content:flex-end}.writing-block-organizer-description{flex-basis:calc(100% - 50px)}}
+
+/* Revisión editorial: requisitos y consejos separados, sin bloquear borradores */
+.editorial-review{margin:20px 0;padding:20px;border:1px solid #c9dcd0;border-radius:12px;background:#f8fbf9}
+.editorial-review-heading{display:flex;align-items:start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.editorial-review-heading h2{font-size:20px;line-height:1.3;margin:0 0 6px;color:#1f5134}
+.editorial-review-heading p{font-size:13px;line-height:1.5;color:#556b5d;margin:0}
+.editorial-review-count{flex:none;font-size:12px;font-weight:750;padding:8px 11px;border-radius:20px;background:#e5f3e9;color:#1d6238}
+.editorial-review-count--pending{background:#fff3dd;color:#875900}
+.editorial-review-groups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.editorial-review-group{background:#fff;border:1px solid #d7e4db;border-radius:9px;padding:15px}
+.editorial-review-group h3{font-size:15px;margin:0 0 12px}
+.editorial-review-group ul{list-style:none;margin:0;padding:0;display:grid;gap:11px}
+.editorial-review-group li{display:flex;gap:10px;align-items:start;font-size:13px}
+.editorial-review-group li>span{border-radius:50%;display:grid;place-items:center;flex:none;width:21px;height:21px;background:#e4f1e8;color:#267647;font-weight:800}
+.editorial-review-group li.is-pending>span{background:#fff0d5;color:#925d00}
+.editorial-review-group li.is-advisory>span{background:#eff1ef;color:#657469}
+.editorial-review-group li>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.editorial-review-group li strong{color:#2b4232;font-size:13px}
+.editorial-review-group li small{color:#66776b;font-size:12px;line-height:1.4}
+.editorial-review-summary{margin:16px 0 0;padding:12px 14px;border-radius:8px;background:#edf5ef;color:#2b5438;line-height:1.5;font-size:13px}
+@media(max-width:720px){.editorial-review{padding:13px}.editorial-review-heading{flex-direction:column;gap:10px}.editorial-review-groups{grid-template-columns:1fr}}
