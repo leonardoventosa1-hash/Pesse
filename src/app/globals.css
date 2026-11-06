@@ -633,3 +633,9 @@ body{color:var(--pesse-ink)}
 .writing-excerpt-editor{display:flex;flex-direction:column;gap:11px}
 .writing-excerpt-editor h3{margin:0;font-size:15px}
 @media(max-width:650px){.visual-editor-surface{padding:15px;min-height:260px}.visual-editor-tools{padding:8px}.visual-editor-tools button{min-height:40px}}
+
+/* Contextual editorial formatting when text is selected */
+.visual-editor-content{position:relative}
+.visual-editor-floating{position:absolute;z-index:15;display:flex;gap:3px;align-items:center;padding:5px;border-radius:8px;border:1px solid #b9d3c1;background:#183a29;box-shadow:0 8px 24px rgba(13,38,25,.24)}
+.visual-editor-floating button{border:0;border-radius:4px;background:transparent;color:white;font-size:12px;font-weight:700;padding:7px 10px;min-width:30px;cursor:pointer}
+.visual-editor-floating button:hover,.visual-editor-floating button:focus-visible{background:#2b6342}
