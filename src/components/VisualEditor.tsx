@@ -10,7 +10,8 @@ function inlineHtml(s:string){
 }
 function toHtml(value:string,compact:boolean){
  if(compact)return "<p>"+inlineHtml(value||"").replace(/\n/g,"<br>")+"</p>";
- return (value||"").split(/\n\s*\n/).map(block=>{
+ const prefix=/^!\[[^\]]*\]\(https?:\/\/[^\s)]+\)/.test((value||"").trim())?'<p class="visual-editor-writing-line"><br></p>':"";
+ return prefix+(value||"").split(/\n\s*\n/).map(block=>{
   const line=block.trim();
   const image=line.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)$/);
   if(image)return '<figure contenteditable="false"><img src="'+escapeHtml(image[2])+'" alt="'+escapeHtml(image[1])+'"/><figcaption>'+escapeHtml(image[1])+'</figcaption></figure><p class="visual-editor-writing-line"><br></p>';
@@ -67,7 +68,7 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
    const paragraph=document.createElement("p");paragraph.className="visual-editor-writing-line";paragraph.appendChild(document.createElement("br"));el.appendChild(paragraph);target=paragraph
   }
   const selection=window.getSelection(),range=document.createRange();
-  range.selectNodeContents(target);range.collapse(false);
+  range.selectNodeContents(target);range.collapse(true);
   el.focus();selection?.removeAllRanges();selection?.addRange(range);
   target.scrollIntoView({block:"nearest",behavior:"auto"});
  }
