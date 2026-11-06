@@ -97,7 +97,7 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
   range.selectNodeContents(target);range.collapse(true);
   el.focus();selection?.removeAllRanges();selection?.addRange(range);
   lastImageFocus.current=insertedImage.sequence;
-  onInsertionPointChange?.(Array.from(el.children).filter(child=>child===figure||((child.tagName==="FIGURE"||!!child.textContent?.trim())&&Boolean(child.compareDocumentPosition(figure)&Node.DOCUMENT_POSITION_FOLLOWING))).length);
+  onInsertionPointChange?.(Array.from(el.children).slice(0,Array.from(el.children).indexOf(figure)+1).filter(child=>child.tagName==="FIGURE"||Boolean(child.textContent?.trim())).length);
   target.scrollIntoView({block:"nearest"});
  },[insertedImage,sourceMode,compact,value,onInsertionPointChange]);
  function update(){const el=ref.current;if(!el||!dirty.current)return;const next=toMarkdown(el,compact);dirty.current=false;last.current=next;onChange(next)}
