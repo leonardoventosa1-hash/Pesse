@@ -15,6 +15,9 @@ function toHtml(value:string,compact:boolean){
   const line=block.trim();
   const image=line.match(/^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)$/);
   if(image)return '<figure contenteditable="false"><img src="'+escapeHtml(image[2])+'" alt="'+escapeHtml(image[1])+'"/><figcaption>'+escapeHtml(image[1])+'</figcaption></figure><p class="visual-editor-writing-line"><br></p>';
+  const lines=line.split("\n").filter(item=>item.trim());
+  if(lines.length&&lines.every(item=>/^[-*] /.test(item)))return "<ul>"+lines.map(item=>"<li>"+inlineHtml(item.replace(/^[-*] /,""))+"</li>").join("")+"</ul>";
+  if(lines.length&&lines.every(item=>/^\d+\. /.test(item)))return "<ol>"+lines.map(item=>"<li>"+inlineHtml(item.replace(/^\d+\. /,""))+"</li>").join("")+"</ol>";
   if(line.startsWith("## "))return "<h2>"+inlineHtml(line.slice(3))+"</h2>";
   if(line.startsWith("### "))return "<h3>"+inlineHtml(line.slice(4))+"</h3>";
   if(line.startsWith("> "))return "<blockquote>"+inlineHtml(line.slice(2))+"</blockquote>";
@@ -41,6 +44,12 @@ function toMarkdown(root:HTMLElement,compact:boolean){
   if(!(child instanceof HTMLElement))continue;
   if(child.tagName==="FIGURE"){
    const img=child.querySelector("img");if(img){const src=img.getAttribute("src")||"";if(/^https?:\/\//i.test(src))parts.push("!["+(img.getAttribute("alt")||"").replace(/[\[\]]/g,"")+"]("+src+")")}continue
+  }
+  if(child.tagName==="UL"||child.tagName==="OL"){
+   const ordered=child.tagName==="OL";
+   const items=Array.from(child.children).filter(item=>item.tagName==="LI");
+   if(items.length)parts.push(items.map((item,index)=>(ordered?(index+1)+". ":"- ")+Array.from(item.childNodes).map(parseInline).join("").trim()).join("\n"));
+   continue;
   }
   const content=Array.from(child.childNodes).map(parseInline).join("").trim();
   if(!content)continue;
@@ -76,17 +85,19 @@ export default function VisualEditor({value,onChange,label,compact=false,placeho
  function command(name:string){
   const el=ref.current;if(!el)return;el.focus();
   if(name==="link"){const selection=window.getSelection();const savedRange=selection&&selection.rangeCount&&el.contains(selection.anchorNode)&&el.contains(selection.focusNode)?selection.getRangeAt(0).cloneRange():null;const url=window.prompt("Dirección del enlace (https://):","https://");if(!url)return;try{const parsed=new URL(url);if(!["https:","http:"].includes(parsed.protocol))return;if(savedRange&&selection){el.focus();selection.removeAllRanges();selection.addRange(savedRange)}document.execCommand("createLink",false,parsed.href)}catch{return}}
-  else if(name==="h2"||name==="quote")document.execCommand("formatBlock",false,name==="h2"?"h2":"blockquote");
+  else if(name==="h2"||name==="h3"||name==="quote")document.execCommand("formatBlock",false,name==="quote"?"blockquote":name);
   else document.execCommand(name,false);
   dirty.current=true;update();setSelectionMenu(null)
  }
  return <section className="visual-editor" aria-label={label}>
   <div className="visual-editor-tools" role="toolbar" aria-label={"Formato de "+label}>
+   <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("undo")} title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
+   <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("redo")} title="Rehacer (Ctrl+Y o Ctrl+Shift+Z)">↷ Rehacer</button>
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("bold")} title="Negrita"><b>N</b></button>
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("italic")} title="Cursiva"><i>C</i></button>
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("underline")} title="Subrayado"><u>S</u></button>
    <button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("link")}>Enlace</button>
-   {!compact&&<><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("h2")}>Subtítulo</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("quote")}>Cita</button><button type="button" className="visual-editor-continue" onMouseDown={e=>e.preventDefault()} onClick={continueWriting} title="Colocar el cursor después de la última fotografía">Escribir debajo de las fotos</button></>}
+   {!compact&&<><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("h2")}>Subtítulo</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("h3")}>Encabezado menor</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("quote")}>Cita</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("insertUnorderedList")}>• Lista</button><button type="button" onMouseDown={e=>e.preventDefault()} onClick={()=>command("insertOrderedList")}>1. Lista</button><button type="button" className="visual-editor-continue" onMouseDown={e=>e.preventDefault()} onClick={continueWriting} title="Colocar el cursor después de la última fotografía">Escribir debajo de las fotos</button></>}
    <button type="button" className="visual-editor-mode" onClick={()=>{setSelectionMenu(null);setSourceMode(prev=>!prev)}} aria-pressed={sourceMode}>{sourceMode?"Volver a vista visual":"Ver código del texto"}</button>
   </div>
   {sourceMode&&<div className="visual-editor-source"><label>Modo de texto original<textarea value={value} onChange={e=>{dirty.current=false;last.current=null;onChange(e.target.value)}} rows={compact?5:16} spellCheck/></label><small>Este modo muestra el formato interno de la noticia. Volvé a la vista visual para seguir redactando normalmente.</small></div>}
