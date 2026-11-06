@@ -16,6 +16,7 @@ export default function StreamSettings(){
  const [title,setTitle]=useState("");
  const [description,setDescription]=useState("");
  const [record,setRecord]=useState<SavedStream|null>(null);
+ const [history,setHistory]=useState<SavedStream[]>([]);
  const [notice,setNotice]=useState("");
  const id=youtubeIdFromUrl(url);
  useEffect(()=>{
@@ -29,11 +30,13 @@ export default function StreamSettings(){
     if(role!=="admin"){router.replace("/admin");return}
     const result=await db.from("editorial_videos")
      .select("id,youtube_id,title,description,status,published_at")
-     .eq("category","stream").order("published_at",{ascending:false,nullsFirst:false}).limit(1).maybeSingle();
+     .eq("category","stream").order("published_at",{ascending:false,nullsFirst:false}).limit(30);
     if(result.error)throw result.error;
     if(!active)return;
     setAuthorized(true);
-    const current=result.data as SavedStream|null;
+    const all=(result.data??[]) as SavedStream[];
+    const current=all.find(item=>item.status==="published")??all[0]??null;
+    setHistory(all.filter(item=>item.id!==current?.id));
     if(current){
      setRecord(current);
      setUrl(youtubeWatchUrl(current.youtube_id));
@@ -56,14 +59,44 @@ export default function StreamSettings(){
   try{
    const date=new Date().toISOString();
    const data={youtube_id:id,title:cleanedTitle,description:description.trim(),category:"stream",status:"published",published_at:date,display_order:0};
-   const result=record
-    ?await db.from("editorial_videos").update(data).eq("id",record.id).select("id,youtube_id,title,description,status,published_at").single()
+   // Same video: edit metadata in place. New video: keep the previous
+   // broadcast as an archived row that can be restored later.
+   const same=record?.youtube_id===id;
+   const result=same
+    ?await db.from("editorial_videos").update(data).eq("id",record!.id).select("id,youtube_id,title,description,status,published_at").single()
     :await db.from("editorial_videos").insert(data).select("id,youtube_id,title,description,status,published_at").single();
    if(result.error||!result.data)throw result.error||Error("No se devolvió el registro guardado.");
-   setRecord(result.data as SavedStream);
+   const saved=result.data as SavedStream;
+   let archiveFailed=false;
+   if(!same&&record?.status==="published"){
+    const {error:archiveError}=await db.from("editorial_videos").update({status:"archived"}).eq("id",record.id).eq("status","published");
+    archiveFailed=!!archiveError;
+   }
+   if(!same)setHistory(current=>record?[{...record,status:record.status==="published"?"archived":record.status},...current]:current);
+   setRecord(saved);
    setTitle(cleanedTitle);
-   setNotice("Video destacado guardado. Aparecerá en la portada y en Pesse Stream al volver a cargar la página.");
+   if(archiveFailed)setNotice("El nuevo video quedó publicado, pero no se pudo archivar la emisión anterior. Recargá el panel para verificar.");
+   else if(same||!record||record.status!=="published")setNotice("Video destacado guardado. Ya podés comprobarlo en la portada.");
+   else setNotice("Nueva emisión destacada. El programa anterior quedó en el historial para recuperarlo.");
   }catch(error){setNotice("No se pudo guardar el video: "+(error instanceof Error?error.message:"Error desconocido"))}
+  finally{setBusy(false)}
+ }
+ async function restore(item:SavedStream){
+  if(!authorized||busy||!window.confirm("¿Volver a destacar esta emisión de Pesse Stream?"))return;
+  const db=supabase();if(!db)return;
+  setBusy(true);setNotice("Recuperando emisión…");
+  try{
+   const result=await db.from("editorial_videos").update({status:"published",published_at:new Date().toISOString()}).eq("id",item.id).select("id,youtube_id,title,description,status,published_at").single();
+   if(result.error||!result.data)throw result.error||Error("No se pudo recuperar la emisión.");
+   const saved=result.data as SavedStream;
+   if(record?.status==="published"){
+    const {error}=await db.from("editorial_videos").update({status:"archived"}).eq("id",record.id).eq("status","published");
+    if(error)throw Error("La emisión se activó, pero no se pudo archivar la anterior. Recargá el panel para confirmar el estado.");
+   }
+   setHistory(old=>[...(record?[{...record,status:record.status==="published"?"archived":record.status}]:[]),...old.filter(x=>x.id!==item.id)]);
+   setRecord(saved);setUrl(youtubeWatchUrl(saved.youtube_id));setTitle(saved.title);setDescription(saved.description);
+   setNotice("Emisión recuperada. Ya está seleccionada para la portada.");
+  }catch(error){setNotice("Revisá el resultado antes de continuar: "+(error instanceof Error?error.message:"Error desconocido"))}
   finally{setBusy(false)}
  }
  async function hide(){
@@ -92,6 +125,11 @@ export default function StreamSettings(){
     <input id="stream-video-title" type="text" maxLength={180} value={title} onChange={e=>setTitle(e.target.value)} placeholder="Pesse Stream · Programa del lunes"/>
     <label htmlFor="stream-video-description">Descripción (opcional)</label>
     <textarea id="stream-video-description" rows={4} maxLength={1000} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Temas destacados de esta emisión…"/>
+    {record&&<div className="stream-admin-current" aria-live="polite">
+     <strong>{record.status==="published"?"● Video publicado actualmente":"○ No hay un video destacado activo"}</strong>
+     {record.status==="published"&&<small>{record.title} · {record.published_at?new Date(record.published_at).toLocaleDateString("es-AR"):"Sin fecha"}</small>}
+     {record.status==="published"&&<a href={youtubeWatchUrl(record.youtube_id)} target="_blank" rel="noopener noreferrer">Ver video actual en YouTube ↗</a>}
+    </div>}
     <div className="stream-admin-actions">
      <button type="submit" className="primary-button" disabled={!id||busy}>{busy?"Guardando…":"Guardar y destacar video"}</button>
      {record?.status==="published"&&<button type="button" className="secondary-button" disabled={busy} onClick={()=>void hide()}>Retirar destacado</button>}
@@ -103,6 +141,14 @@ export default function StreamSettings(){
     <h2>Vista previa</h2>
     {id?<><div className="stream-admin-frame"><iframe src={"https://www.youtube-nocookie.com/embed/"+id+"?rel=0"} title="Vista previa del video destacado" loading="lazy" allow="encrypted-media; picture-in-picture" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen/></div><p>{title.trim()||"Pesse Stream · Última emisión"}</p></>:<p>Ingresá un enlace para ver el reproductor.</p>}
     <Link href="/" target="_blank" rel="noopener noreferrer">Abrir portada ↗</Link>
+    {history.length>0&&<div className="stream-admin-history">
+     <h3>Emisiones anteriores</h3>
+     <p>Podés recuperar un programa sin volver a copiar su enlace.</p>
+     <ul>{history.filter(item=>item.status!=="published").slice(0,10).map(item=><li key={item.id}>
+      <div><strong>{item.title}</strong><small>{item.published_at?new Date(item.published_at).toLocaleDateString("es-AR"):"Sin fecha"}</small></div>
+      <button type="button" className="secondary-button" disabled={busy} onClick={()=>void restore(item)}>Destacar otra vez</button>
+     </li>)}</ul>
+    </div>}
    </aside>
   </div>:<p role="alert">{notice||"No tenés permisos para gestionar Pesse Stream."}</p>}
  </main>;
