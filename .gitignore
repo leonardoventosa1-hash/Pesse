@@ -3,3 +3,14 @@ node_modules/
 .env
 .env.local
 .env.*.local
+
+# Resguardos y artefactos que pueden contener datos personales
+backups/
+*.tar.gz.age
+*.tar.gz.age.sha256
+*.dump
+*.backup
+*.sql.gz
+pesse-restauracion/
+pesse-restauracion.tar.gz
+pesse-backup-key.txt

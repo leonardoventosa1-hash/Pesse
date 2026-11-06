@@ -1,0 +1,50 @@
+name: Validate backup tools
+on:
+  pull_request:
+    paths:
+      - "scripts/backup-pesse.ps1"
+      - "scripts/backup-storage.mjs"
+      - "scripts/verify-backup.mjs"
+      - ".github/workflows/validate-backup-tools.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/backup-pesse.ps1"
+      - "scripts/backup-storage.mjs"
+      - "scripts/verify-backup.mjs"
+      - ".github/workflows/validate-backup-tools.yml"
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+      - name: Validar sintaxis JavaScript y PowerShell
+        run: |
+          node --check scripts/backup-storage.mjs
+          node --check scripts/verify-backup.mjs
+          pwsh -NoProfile -Command '$tokens=$null;$errors=$null;[System.Management.Automation.Language.Parser]::ParseFile("scripts/backup-pesse.ps1",[ref]$tokens,[ref]$errors)|Out-Null;if($errors.Count){$errors|Out-String|Write-Error;exit 1}'
+      - name: Probar manifest, hashes y detección de corrupción sin credenciales
+        run: |
+          node --input-type=module <<'NODE'
+          import {mkdir,writeFile} from "node:fs/promises";
+          import {createHash} from "node:crypto";
+          await mkdir("test-backup/storage/news-images", {recursive:true});
+          const bytes=Buffer.from("ejemplo ficticio de respaldo");
+          await writeFile("test-backup/storage/news-images/prueba.txt",bytes);
+          const sha256=createHash("sha256").update(bytes).digest("hex");
+          await writeFile("test-backup/storage-manifest.json",JSON.stringify({buckets:[{name:"news-images",public:true}],files:[{bucket:"news-images",path:"prueba.txt",bytes:bytes.length,sha256}]}));
+          for(const sql of ["roles.sql","schema.sql","data.sql"])await writeFile("test-backup/"+sql,"-- prueba\n");
+          NODE
+          node scripts/verify-backup.mjs test-backup
+          printf "archivo alterado" > test-backup/storage/news-images/prueba.txt
+          if node scripts/verify-backup.mjs test-backup; then
+            echo "ERROR: la corrupción del respaldo no fue detectada"
+            exit 1
+          fi
