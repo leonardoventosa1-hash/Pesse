@@ -27,7 +27,16 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
     failed=Boolean(response.error);
     if(!failed){
      const data=response.data as {items?:unknown;total?:unknown}|null;
-     if(!data||!Array.isArray(data.items)||typeof data.total!=="number"||!Number.isSafeInteger(data.total)||data.total<0){failed=true}
+     if(!data||!Array.isArray(data.items)||typeof data.total!=="number"||!Number.isSafeInteger(data.total)||data.total<0||
+      data.items.length>perPage||(currentPage===1&&data.total<data.items.length)||!data.items.every((item:unknown)=>{
+       if(!item||typeof item!=="object")return false;
+       const hit=item as Record<string,unknown>;
+       return typeof hit.id==="string"&&hit.id.length>0&&typeof hit.slug==="string"&&hit.slug.length>0&&
+        typeof hit.title==="string"&&hit.title.length>0&&
+        (hit.excerpt===null||typeof hit.excerpt==="string")&&
+        (hit.cover_url===null||typeof hit.cover_url==="string")&&
+        (hit.published_at===null||typeof hit.published_at==="string");
+      })){failed=true}
      else result=data as {items:SearchHit[];total:number};
     }
    }catch{failed=true}
