@@ -15,6 +15,42 @@ const currentSnapshot=snapshot(title,slug,excerpt,body,cover,category,status,aut
 currentSnapshotRef.current=currentSnapshot;
 const unsavedChanges=ready&&savedSnapshot.current!==null&&currentSnapshot!==savedSnapshot.current;
 useEffect(()=>{if(!unsavedChanges)return;const warn=(event:BeforeUnloadEvent)=>{event.preventDefault();event.returnValue=""};window.addEventListener("beforeunload",warn);return()=>window.removeEventListener("beforeunload",warn)},[unsavedChanges]);
+const unsavedRef=useRef(false);
+unsavedRef.current=unsavedChanges;
+// Mobile browser back/swipe does not trigger beforeunload for same-site history navigation.
+// Keep a history entry while editing, and ask before abandoning unsaved work.
+useEffect(()=>{
+ if(!ready)return;
+ window.history.pushState({pesseEditorGuard:true},"",window.location.href);
+ const onBack=()=>{
+  if(unsavedRef.current&&!window.confirm("Tenés cambios sin guardar. ¿Querés salir del editor? Tu copia temporal quedará en este dispositivo.")){
+   window.history.pushState({pesseEditorGuard:true},"",window.location.href);
+   return;
+  }
+  router.replace("/admin");
+ };
+ window.addEventListener("popstate",onBack);
+ return()=>window.removeEventListener("popstate",onBack);
+},[ready,router]);
+// Persist immediately on app backgrounding or page exit: mobile browsers can suspend
+// before the normal debounced backup finishes.
+useEffect(()=>{
+ if(!ready)return;
+ const persist=()=>{
+  const key=draftKey.current;
+  if(!key||!unsavedRef.current)return;
+  try{
+   const copy=JSON.stringify({snapshot:currentSnapshotRef.current,savedAt:Date.now()});
+   window.localStorage.setItem(key,copy);
+   window.sessionStorage.setItem(key,copy);
+  }catch{}
+ };
+ const onVisibility=()=>{if(document.visibilityState==="hidden")persist()};
+ document.addEventListener("visibilitychange",onVisibility);
+ window.addEventListener("pagehide",persist);
+ return()=>{document.removeEventListener("visibilitychange",onVisibility);window.removeEventListener("pagehide",persist)};
+},[ready]);
+
 useEffect(()=>{if(!ready||!draftKey.current||recovery)return;const key=draftKey.current;if(!unsavedChanges){setBackupStatus("idle");return}setBackupStatus("saving");const timer=window.setTimeout(()=>{try{const now=Date.now();const copy=JSON.stringify({snapshot:currentSnapshot,savedAt:now});window.sessionStorage.setItem(key,copy);window.localStorage.setItem(key,copy);setBackupTime(new Date(now).toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}));setBackupStatus("saved")}catch{setBackupStatus("error")}},1200);return()=>window.clearTimeout(timer)},[ready,currentSnapshot,unsavedChanges,recovery]);
 // Remote autosave is deliberately limited to existing, unpublished drafts.
 useEffect(()=>{
