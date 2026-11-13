@@ -1,5 +1,7 @@
 // Client-side processing: only the optimized file is sent to Storage.
-const MAX_BYTES=5*1024*1024;
+export const MAX_ORIGINAL_IMAGE_MB=20;
+const MAX_ORIGINAL_BYTES=MAX_ORIGINAL_IMAGE_MB*1024*1024;
+const MAX_UPLOAD_BYTES=5*1024*1024;
 const MAX_EDGE=1920;
 const TARGET_BYTES=350*1024;
 const TYPES=["image/jpeg","image/png","image/webp"];
@@ -25,7 +27,9 @@ function encode(canvas:HTMLCanvasElement,type:string,quality:number):Promise<Blo
  return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("No se pudo preparar la imagen. Volvé a intentarlo.")),type,quality));
 }
 export async function optimizeImage(file:File):Promise<OptimizedImage>{
- if(!TYPES.includes(file.type)||file.size===0||file.size>MAX_BYTES)throw new Error("Solo JPG, PNG o WebP hasta 5 MB.");
+ if(!TYPES.includes(file.type))throw new Error("Elegí una imagen JPG, PNG o WebP.");
+ if(file.size===0)throw new Error("El archivo está vacío. Elegí otra imagen.");
+ if(file.size>MAX_ORIGINAL_BYTES)throw new Error(`La imagen original supera los ${MAX_ORIGINAL_IMAGE_MB} MB. Exportala con menor resolución y volvé a intentar.`);
  const image=await decode(file);
  const canvas=document.createElement("canvas");
  try{
@@ -56,8 +60,8 @@ export async function optimizeImage(file:File):Promise<OptimizedImage>{
    else {width=previous.width;height=previous.height;best=previous.blob}
   }
   // A file already smaller than its re-encoded version needs no recompression.
-  if(scale===1&&width===image.width&&height===image.height&&file.size<=best.size)return {file,originalBytes:file.size,width,height};
-  if(best.size>MAX_BYTES)throw new Error("No se pudo reducir la imagen a menos de 5 MB. Exportala con menor resolución.");
+  if(scale===1&&width===image.width&&height===image.height&&file.size<=MAX_UPLOAD_BYTES&&file.size<=best.size)return {file,originalBytes:file.size,width,height};
+  if(best.size>MAX_UPLOAD_BYTES)throw new Error("No se pudo reducir la imagen a 5 MB o menos. Exportala con menor resolución.");
   const ext=best.type==="image/webp"?"webp":best.type==="image/jpeg"?"jpg":"png";
   const name=(file.name.replace(/\.[^.]+$/,"")||"fotografia")+"."+ext;
   return {file:new File([best],name,{type:best.type,lastModified:Date.now()}),originalBytes:file.size,width,height};
