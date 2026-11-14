@@ -29,7 +29,7 @@ export default async function Buscar({searchParams}:{searchParams:Promise<{q?:st
      const data=response.data as {items?:unknown;total?:unknown}|null;
      const items=data?.items;
      if(!data||!Array.isArray(items)||typeof data.total!=="number"||!Number.isSafeInteger(data.total)||data.total<0||
-      items.length>perPage||["id","slug"].some(key=>new Set(items.map((item:unknown)=>item&&typeof item==="object"?(item as Record<string,unknown>)[key]:null)).size!==items.length)||(currentPage===1&&data.total<items.length)||
+      items.length>perPage||items.length>Math.max(0,data.total-(currentPage-1)*perPage)||["id","slug"].some(key=>new Set(items.map((item:unknown)=>item&&typeof item==="object"?(item as Record<string,unknown>)[key]:null)).size!==items.length)||(currentPage===1&&data.total<items.length)||
       (data.total>0&&currentPage<=Math.ceil(data.total/perPage)&&items.length===0)||!items.every((item:unknown)=>{
        if(!item||typeof item!=="object")return false;
        const hit=item as Record<string,unknown>;
