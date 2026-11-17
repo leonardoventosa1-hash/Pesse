@@ -39,7 +39,7 @@ return <main className="container main editorial-dashboard">{deleteTarget&&<Perm
   <div className="dashboard-article-actions-inner">
     <Link href={`/admin/editar/${a.id}`}>Editar ↗</Link>
     <button type="button" className="secondary-button" onClick={()=>void duplicateArticle(a)}>Duplicar como borrador</button>
-    {a.status==="published" ? <Link href={`/noticias/${a.slug}`} target="_blank" rel="noopener noreferrer">Ver publicada ↗</Link> : null}
+    {a.status==="published" ? <><Link href={`/noticias/${a.slug}`} target="_blank" rel="noopener noreferrer">Ver publicada ↗</Link><Link className="secondary-button" href={`/admin/historia/${a.id}`}>Crear historia de Instagram</Link></> : null}
     {role==="admin" && a.status==="published" ? <button type="button" className="secondary-button" onClick={()=>void featureArticle(a.id)} disabled={!!a.is_featured}>{a.is_featured?"Destacada":"Destacar"}</button> : null}
     {role==="admin" && a.status==="published" ? <button type="button" className="secondary-button" onClick={()=>void unpublishArticle(a.id,a.title)}>Retirar publicación</button> : null}
     {role==="admin" ? <button type="button" className="secondary-button" onClick={()=>void removeArticle(a.id,a.title)}>Enviar a papelera</button> : null}
