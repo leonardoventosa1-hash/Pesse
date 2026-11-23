@@ -11,14 +11,23 @@ const root=process.argv[2];
 if(!root)throw Error("Indicá el directorio del respaldo extraído.");
 const manifest=JSON.parse(await readFile(path.join(root,"storage-manifest.json"),"utf8"));
 if(!Array.isArray(manifest.files)||!Array.isArray(manifest.buckets))throw Error("Inventario inválido.");
+const validComponent=(value)=>typeof value==="string"&&value!==""&&value!=="."&&value!==".."
+ && !/[\/\\\0]/.test(value) && !/^[a-z]:/i.test(value);
+const buckets=new Set();
+for(const bucket of manifest.buckets){
+ if(!validComponent(bucket?.name)||typeof bucket.public!=="boolean"||buckets.has(bucket.name))
+  throw Error("Bucket inválido o duplicado en el inventario.");
+ buckets.add(bucket.name);
+}
 const keys=new Set();
 let total=0;
 for(const item of manifest.files){
- if(typeof item.bucket!=="string"||typeof item.path!=="string"
-   ||typeof item.sha256!=="string"||!Number.isSafeInteger(item.bytes)||item.bytes<0)
+ if(!item||!buckets.has(item.bucket)||typeof item.path!=="string"
+   ||typeof item.sha256!=="string"||!/^[a-f0-9]{64}$/.test(item.sha256)
+   ||!Number.isSafeInteger(item.bytes)||item.bytes<0)
   throw Error("Entrada del inventario inválida.");
  const fragments=[item.bucket,...item.path.split("/")];
- if(fragments.some(v=>!v||v==="."||v===".."||v.includes("\\")||v.includes("\0")))
+ if(!fragments.every(validComponent))
   throw Error("Ruta insegura dentro del respaldo.");
  const key=fragments.join("/");
  if(keys.has(key))throw Error("Objeto duplicado en inventario.");
@@ -33,7 +42,7 @@ for(const item of manifest.files){
 }
 for(const name of ["roles.sql","schema.sql","data.sql"]){
  const file=await stat(path.join(root,name));
- if(!file.isFile())throw Error("Falta el archivo SQL: "+name);
+ if(!file.isFile()||file.size===0)throw Error("Archivo SQL vacío o inválido: "+name);
 }
 console.log("Copia íntegra: "+keys.size+" archivos de Storage y "+total+" bytes comprobados. SQL presente.");
 console.log("Integridad no equivale a una restauración exitosa. Probarla en un entorno aislado.");

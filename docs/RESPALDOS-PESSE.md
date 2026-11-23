@@ -21,7 +21,7 @@ Guía de CLI: https://supabase.com/docs/guides/platform/migrating-within-supabas
 
 1. En una máquina confiable con disco cifrado: instalar Node.js, Docker Desktop, Supabase CLI, tar y age.
 2. Verificar versiones y parámetros con "supabase --help", "supabase db dump --help" y "age --help". Las opciones y CLI pueden cambiar.
-3. Ejecutar "npm ci" en la raíz de Pesse; el script de Storage utiliza la dependencia existente @supabase/supabase-js.
+3. Ejecutar `npm install --no-audit --no-fund` en la raíz de Pesse para instalar `@supabase/supabase-js`, que usa el script de Storage. El repositorio todavía no incluye un archivo de bloqueo.
 4. Crear una clave age con "age-keygen -o pesse-backup-key.txt" en una carpeta segura **FUERA del repositorio**. Guardar la clave privada cifrada y una copia independiente. La línea de clave pública que comienza por "age1" es el recipient de cifrado; nunca entregar la privada.
 5. Obtener la conexión de Postgres por **Session pooler** desde el botón Connect del proyecto Supabase (o conexión directa si la red admite IPv6). Utilizar un usuario con permiso de respaldo.
 6. Obtener de Supabase la clave secreta/service_role para descargar objetos de Storage; es privilegiada y jamás debe quedar en el código, el cliente web, logs ni este documento.
@@ -38,14 +38,14 @@ No pegar estas claves en ChatGPT. Introducirlas mediante un gestor de secretos o
 
 Desde la raíz del proyecto:
 
-    npm ci
+    npm install --no-audit --no-fund
     .\scripts\backup-pesse.ps1
 
 La salida se encuentra en la carpeta backups/ (ignorada por Git), con un archivo cifrado del tipo:
 - pesse-AAAAMMDD-HHMMSS.tar.gz.age
 - pesse-AAAAMMDD-HHMMSS.tar.gz.age.sha256
 
-Si falla una etapa, el script debe terminar con error y retirar sus archivos parciales. No realiza cambios en Supabase; sólo lee la base y descarga los archivos existentes. **Un archivo existente no demuestra que pueda restaurarse**.
+El script verifica el inventario, las huellas SHA-256 de los objetos y los tres archivos SQL antes de empaquetar y cifrar. Si una etapa falla, termina con error y retira los archivos parciales. El proceso lee la base y descarga los objetos de Storage. La restauración se comprueba por separado en el entorno de ensayo.
 
 Guardar el archivo cifrado en dos ubicaciones independientes, por ejemplo un disco externo cifrado y almacenamiento privado con autenticación fuerte. Guardar la clave privada age **separada** del respaldo.
 
@@ -61,7 +61,7 @@ En una computadora confiable, con la clave privada age disponible **solo localme
     tar -xzf "pesse-restauracion.tar.gz" -C ".\pesse-restauracion"
     node .\scripts\verify-backup.mjs .\pesse-restauracion
 
-Comparar el hash de Get-FileHash con el .sha256 del respaldo cifrado. El verificador comprueba las huellas de los archivos de Storage y la presencia de exportaciones SQL. Limpiar los archivos descifrados al terminar, sin dejarlos en carpetas públicas o sincronizadas.
+Comparar el hash de Get-FileHash con el .sha256 del respaldo cifrado. El verificador comprueba las huellas de los archivos de Storage y que las exportaciones SQL existan y tengan contenido. Limpiar los archivos descifrados al terminar, sin dejarlos en carpetas públicas o sincronizadas.
 
 ## Prueba de recuperación: nunca sobre el proyecto productivo
 

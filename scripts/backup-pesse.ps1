@@ -43,10 +43,8 @@ try {
  Assert-Exit "Respaldo de datos"
  & node (Join-Path $projectRoot "scripts\backup-storage.mjs") (Join-Path $work "storage") (Join-Path $work "storage-manifest.json")
  Assert-Exit "Respaldo de Storage"
- $files = @("roles.sql","schema.sql","data.sql","storage-manifest.json")
- foreach ($file in $files) {
-  if (-not (Test-Path (Join-Path $work $file))) { throw "Falta ${file}: respaldo incompleto." }
- }
+ & node (Join-Path $projectRoot "scripts\verify-backup.mjs") $work
+ Assert-Exit "Verificación de integridad del respaldo"
  $metadata = @{
   project = "Pesse"
   created_utc = (Get-Date).ToUniversalTime().ToString("o")
