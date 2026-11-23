@@ -5,6 +5,7 @@ on:
       - "scripts/backup-pesse.ps1"
       - "scripts/backup-storage.mjs"
       - "scripts/verify-backup.mjs"
+      - "docs/RESPALDOS-PESSE.md"
       - ".github/workflows/validate-backup-tools.yml"
   workflow_dispatch:
 
@@ -43,8 +44,20 @@ jobs:
           for(const sql of ["roles.sql","schema.sql","data.sql"])await writeFile("test-backup/"+sql,"-- prueba\n");
           NODE
           node scripts/verify-backup.mjs test-backup
-          printf "archivo alterado" > test-backup/storage/news-images/prueba.txt
+          node --input-type=module <<'NODE'
+          import {readFile,writeFile} from "node:fs/promises";
+          const path="test-backup/storage/news-images/prueba.txt";
+          const bytes=await readFile(path);
+          bytes[0]^=1;
+          await writeFile(path,bytes);
+          NODE
           if node scripts/verify-backup.mjs test-backup; then
             echo "ERROR: la corrupción del respaldo no fue detectada"
+            exit 1
+          fi
+          printf "ejemplo ficticio de respaldo" > test-backup/storage/news-images/prueba.txt
+          truncate -s 0 test-backup/data.sql
+          if node scripts/verify-backup.mjs test-backup; then
+            echo "ERROR: se aceptó una exportación SQL vacía"
             exit 1
           fi
